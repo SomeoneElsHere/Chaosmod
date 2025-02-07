@@ -1,0 +1,10 @@
+﻿{
+    "Name": "chaosaddon",
+    "Author": "SomeoneEls",
+    "Version": "1.0.0",
+    "Description": "code addon to the chaos mod",
+    "UniqueID":"SomeoneEls.chaosaddon",
+    "EntryDll":"chaosaddon.dll",
+    "MinimumApiVersion":"3.0.0",
+    "UpdateKeys":[]
+}
