@@ -4,8 +4,11 @@ This mod is for Stardew Valley! It is mostly a joke mod. Use the Chaosaddon fold
 This will add...
 
 Events! Can happen randomly and effect your playthrough. Can be a whole host of things.
+
 Curses! You can be stuck with a variety of curses, which will effect your playthrough.
+
 New items! Some are not available because of their reliance on the connected mod, but some are available.
+
 New descriptions and prices for items! Yes I made a lot of things uh.. expensive.
 
-This mod does use Harmony Patching for the Catbulb item.
+(This mod does use Harmony Patching for the Catbulb item.)
