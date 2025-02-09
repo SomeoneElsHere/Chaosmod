@@ -59,6 +59,9 @@ namespace chaosaddon
 
     internal class ModEntry : Mod
     {
+
+        private static IMonitor Monitor; 
+
         Thread Misc;
         bool GainExpHoe = false;
 
@@ -66,7 +69,7 @@ namespace chaosaddon
         int randomvar_events1 = 1200; //Random chance in game, early
         int randomvar_events2 = 1800;  //random chance in game, late
 
-        bool CurseTemp = false;
+       static bool CurseTemp = true;
         bool CurseActive = false;  //Says when a curse should be active.
         int CurCurse = 5;  // The current curse (part of switch case logic)
         //curses
@@ -75,12 +78,14 @@ namespace chaosaddon
         Thread Jump;
         Thread Seasonal;
 
+        
+
+
         //items
         /// heroin
-        
         ObjectData Heroin = new ObjectData();
         ObjectBuffData HeroinBuff = new ObjectBuffData();
-        Thread HeroinThread;
+        
 
         //CRAFTING RECIPES
         CraftingRecipe Wood1;
@@ -101,6 +106,8 @@ namespace chaosaddon
 
         public override void Entry(IModHelper helper)
         {
+
+
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
             helper.Events.GameLoop.DayStarted += this.OnDayStarted;
             helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
@@ -115,13 +122,12 @@ namespace chaosaddon
             original: AccessTools.Method(typeof(Slingshot), nameof(Slingshot.GetAmmoDamage)),
             prefix: new HarmonyMethod(typeof(ModEntry), nameof(GetAmmoDamage_Prefix))
             );
+
+            harmony.Patch(
+            original: AccessTools.Method(typeof(Farmer), nameof(Farmer.eatObject)),
+            prefix: new HarmonyMethod(typeof(ModEntry), nameof(GeteatObject))
+            );
         }
-
-
-
-
-
-
 
 
 
@@ -312,6 +318,9 @@ namespace chaosaddon
             //debug
 
             //Game1.player.addItemToInventory((Item)new StardewValley.Object("288", 1, false, 10, 0));
+            /// Misc threads
+            
+            Misc.Start();
             
 
             ///position change Game1.player.Position = new Vector2(800, 600);
@@ -695,31 +704,6 @@ namespace chaosaddon
             }
         }
 
-
-        public void HeroinEvent (object obj)
-        {
-            while(true)
-            {
-                try
-                {
-                    if(Game1.player.itemToEat.ItemId == "HEROIN" )
-                    {
-                        Game1.hudMessages.Add(new HUDMessage("..."));
-                        while(CurseTemp)
-                        {
-                            Thread.Sleep(240000);
-                            Game1.hudMessages.Add(new HUDMessage("...You want more drugs..."));
-                        }
-                        CurseTemp = true;
-                    }
-                }
-                catch(System.NullReferenceException e)
-                {
-                    break;
-                }
-            }
-        }
-
         //CURSES
 
         public void SuperSpeedCurse(object obj)
@@ -853,16 +837,49 @@ namespace chaosaddon
             }
         }
 
+        // BUFFS
+        static public void BuffMethod(string key)
+        {
+            Console.WriteLine(key);
+            switch(key)
+            {
+                case "(O)HEROIN": 
+                Thread HeroinBuffThread = new Thread(new ParameterizedThreadStart(HeroinBuffMethod));
+                HeroinBuffThread.Start();
+                break;
+            }
+        }
+
+        static public void HeroinBuffMethod(object o)
+        {
+            while(CurseTemp)
+            {
+            
+                try
+                {
+                    Game1.hudMessages.Add(new HUDMessage("You want drugs..."));
+                    Thread.Sleep(240000);
+                }
+                catch
+                {
+                    
+                    break;
+                }
+            }
+            CurseTemp = true;
+           
+        }
+        
 
         // NEW CHANGES
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
         {
             //misc events
             Misc = new Thread(new ParameterizedThreadStart(MiscEvents));
-            Misc.Start();
+            
 
-            HeroinThread = new Thread(new ParameterizedThreadStart(HeroinEvent));
-            HeroinThread.Start();
+            
+            
 
             
            
@@ -1097,7 +1114,7 @@ namespace chaosaddon
             Heroin.Buffs.Add(HeroinBuff);
             
             
-
+           
 
             
         }
@@ -1127,25 +1144,45 @@ namespace chaosaddon
         //        _ => 1,
         //    };
         ///}
-
+        
         
 
         ///Slingshot for CATBULB
 
         public static bool GetAmmoDamage_Prefix(StardewValley.Object ammunition, ref int __result)
         {
-            if (ammunition?.QualifiedItemId == "(O)CATBULB")
+            try
             {
-                __result = 15;
-                return false;
+                if (ammunition?.QualifiedItemId == "(O)CATBULB")
+                {
+                    __result = 15;
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
             }
-            else
+            catch (Exception e)
             {
+                Console.WriteLine("Chaosaddon: Ah fuck. Something in the Harmony patch \"GetAmmoDamage_Prefix\" went wrong.");
                 return true;
             }
         }
 
-
+        /// Special buffs
+        public static void GeteatObject(StardewValley.Object o, bool overrideFullness = false)
+        {
+            try
+            {
+                chaosaddon.ModEntry.BuffMethod(o.QualifiedItemId);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Chaosaddon: Ah fuck. Something in the Harmony patch \"GeteatObject\" went wrong.");
+                
+            }
+        }
     }
 
    
