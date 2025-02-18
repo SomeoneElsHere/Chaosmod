@@ -12,4 +12,5 @@ New items! Some are not available because of their reliance on the connected mod
 New descriptions and prices for items! Yes I made a lot of things uh.. expensive.
 
 Plus a mechanic that increases luck and damage for clicking along the BPM. However, this goes with the modded XWB bank, so it won't really work for the original ost.
+
 (This mod does use Harmony Patching for the Catbulb item.)
