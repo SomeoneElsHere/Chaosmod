@@ -896,6 +896,14 @@ namespace chaosaddon
         //MUSIC
         public void OSTBPM(object o)
         {
+            bool running = false;
+            void wait(object b)
+            {
+                Thread.Sleep(100);
+                running = false;
+                Game1.showRedMessage("Great!");
+            }
+
             buffDataMusic = new BuffAttributesData();
             buffDataMusic.AttackMultiplier = 3;
             buffDataMusic.LuckLevel = 3;
@@ -911,20 +919,27 @@ namespace chaosaddon
 
                     while (Game1.getMusicTrackName() != null && BPM.TryGetValue(Game1.getMusicTrackName(), out val) && Game1.player != null)
                     {
+                        running = false;
                         int timer = 0;
-                        Thread.Sleep(val - 200);
+                        Thread.Sleep(val - 100);
                         //Console.WriteLine("proc");
-                        musicAttack.millisecondsDuration = 200;
+                        musicAttack.millisecondsDuration = 100;
                         //musicAttack.visible = false;
                         Game1.player.applyBuff(musicAttack);
-                        while(timer < 200)
+
+                        
+
+                        Thread s = new Thread(new ParameterizedThreadStart(wait));
+
+                        while (timer < 100)
                         {
                             
-                            if (Helper.Input.IsDown(SButton.MouseLeft) && timer%100 == 0)
+                            if (Helper.Input.IsDown(SButton.MouseLeft) && running == false)
                             {
+                                s.Start();
                                 Thread.Sleep(1);
                                 timer++;
-                                Game1.showRedMessage("Great!");
+                                running = true;
                                 
 
                             }
@@ -950,6 +965,13 @@ namespace chaosaddon
                 }
             }
         }
+
+        private bool wait(int time)
+        {
+            Thread.Sleep(time);
+            return true;
+        }
+        
 
 
         // NEW CHANGES
