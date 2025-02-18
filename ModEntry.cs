@@ -35,6 +35,11 @@ using System.Timers;
 using xTile.Tiles;
 using StardewValley.Inventories;
 using StardewValley.GameData.BigCraftables;
+using Microsoft.Xna.Framework.Media;
+using StardewValley.GameData;
+using StardewValley.GameData.Locations;
+using StardewValley.Buffs;
+using StardewValley.GameData.Buffs;
 
 
 // ADDD
@@ -59,9 +64,10 @@ namespace chaosaddon
 
     internal class ModEntry : Mod
     {
+        //data. readonly pls ;u; (bc of shallow copy)
+        Dictionary<string, int> BPM = new Dictionary<string, int>();
 
-        private static IMonitor Monitor; 
-
+        Thread Music;
         Thread Misc;
         bool GainExpHoe = false;
 
@@ -70,6 +76,7 @@ namespace chaosaddon
         int randomvar_events2 = 1800;  //random chance in game, late
 
        static bool CurseTemp = true;
+        static bool CurseTempActive = false;
         bool CurseActive = false;  //Says when a curse should be active.
         int CurCurse = 5;  // The current curse (part of switch case logic)
         //curses
@@ -78,8 +85,11 @@ namespace chaosaddon
         Thread Jump;
         Thread Seasonal;
 
-        
+        BuffAttributesData buffDataMusic;
 
+        BuffEffects buffEffectsMusic;
+        Buff musicAttack;
+        
 
         //items
         /// heroin
@@ -115,6 +125,7 @@ namespace chaosaddon
             helper.Events.GameLoop.TimeChanged += this.OnTimeChanged;
             helper.Events.GameLoop.DayEnding += this.OnDayEnding;
             helper.Events.Player.InventoryChanged += this.OnInventoryChanged;
+            
             var harmony = new Harmony(this.ModManifest.UniqueID);
 
 
@@ -316,10 +327,14 @@ namespace chaosaddon
         private void OnDayStarted(object? sender, DayStartedEventArgs e)
         {
             //debug
+            SoundBank soundBank = this.Helper.Reflection.GetField<SoundBank>(Game1.soundBank, "soundBank").GetValue();
+            IEnumerable<CueDefinition> cues = this.Helper.Reflection.GetField<Dictionary<string, CueDefinition>>(soundBank, "_cues").GetValue().Values;
+            
 
+            
             //Game1.player.addItemToInventory((Item)new StardewValley.Object("288", 1, false, 10, 0));
             /// Misc threads
-            
+
             Misc.Start();
             
 
@@ -837,15 +852,20 @@ namespace chaosaddon
             }
         }
 
-        // BUFFS
+        //SPECIAL BUFFS
         static public void BuffMethod(string key)
         {
-            Console.WriteLine(key);
+            
             switch(key)
             {
-                case "(O)HEROIN": 
-                Thread HeroinBuffThread = new Thread(new ParameterizedThreadStart(HeroinBuffMethod));
-                HeroinBuffThread.Start();
+                case "(O)HEROIN":
+                    if (!CurseTempActive)
+                    {
+                        Thread HeroinBuffThread = new Thread(new ParameterizedThreadStart(HeroinBuffMethod));
+                        HeroinBuffThread.Start();
+                        CurseTempActive = true;
+                    }
+                    
                 break;
             }
         }
@@ -867,27 +887,94 @@ namespace chaosaddon
                 }
             }
             CurseTemp = true;
+            CurseTempActive = false;
            
         }
-        
+
+
+
+        //MUSIC
+        public void OSTBPM(object o)
+        {
+            buffDataMusic = new BuffAttributesData();
+            buffDataMusic.AttackMultiplier = 3;
+            buffDataMusic.LuckLevel = 3;
+
+            buffEffectsMusic = new BuffEffects(buffDataMusic);
+            musicAttack = new Buff("1337", "none", "none", 50, null, 20, buffEffectsMusic, false, "MusicBuff", "Only active now");
+            int val = 0;
+            while (true)
+            {
+                try
+                {
+
+
+                    while (Game1.getMusicTrackName() != null && BPM.TryGetValue(Game1.getMusicTrackName(), out val) && Game1.player != null)
+                    {
+                        int timer = 0;
+                        Thread.Sleep(val - 200);
+                        //Console.WriteLine("proc");
+                        musicAttack.millisecondsDuration = 200;
+                        //musicAttack.visible = false;
+                        Game1.player.applyBuff(musicAttack);
+                        while(timer < 200)
+                        {
+                            
+                            if (Helper.Input.IsDown(SButton.MouseLeft) && timer%100 == 0)
+                            {
+                                Thread.Sleep(1);
+                                timer++;
+                                Game1.showRedMessage("Great!");
+                                
+
+                            }
+                            else
+                            {
+                                Thread.Sleep(1);
+                                timer++;
+                            }
+                        }
+
+
+                        
+
+                    }
+                }
+                catch (Exception e)
+                {
+                    while(!(Game1.getMusicTrackName() != null && BPM.TryGetValue(Game1.getMusicTrackName(), out val) && Game1.player != null))
+                    {
+                        Thread.Sleep(1);
+                        //Console.WriteLine("fail");
+                    }
+                }
+            }
+        }
+
 
         // NEW CHANGES
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
         {
             //misc events
             Misc = new Thread(new ParameterizedThreadStart(MiscEvents));
-            
+            Music = new Thread(new ParameterizedThreadStart(OSTBPM));
+            Music.Start();
+           //data
+
+            BPMData.initalize();
+            BPM = BPMData.getData();
 
             
-            
-
-            
-           
 
 
-            
-            
-            
+
+
+
+
+
+
+
+
 
 
 
