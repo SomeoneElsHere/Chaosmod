@@ -14,7 +14,7 @@ namespace chaosaddon
         
         
         private static Dictionary<string, int> BPM = new Dictionary<string, int>();
-        static StreamReader sw = new StreamReader("C:\\Users\\rando\\source\\repos\\ClassLibrary1\\ClassLibrary1\\BPM3.txt");
+        static StreamReader sw = new StreamReader("BPM ORIG.txt");
         
         public static void initalize()
         {
