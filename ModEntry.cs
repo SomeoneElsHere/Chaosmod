@@ -101,6 +101,12 @@ namespace chaosaddon
         CraftingRecipe Wood1;
 
         //CROPS
+        ///BOMBSEEDS
+        CropData Bomb = new CropData();
+        ObjectData Bombseeds = new ObjectData();
+        ShopItemData Bombshop = new ShopItemData();
+
+
         ///BEERSEEDS
         CropData Beer = new CropData();
         ObjectData Beerseeds = new ObjectData();
@@ -244,7 +250,7 @@ namespace chaosaddon
                     data.Add("CATBULB", CATBULB);
                     data.Add("CATBULBSEEDS", CATBULBSEEDS);
                     data.Add("HEROIN", Heroin);
-                    
+                    data.Add("BOMBSEEDS", Bombseeds);
                     /// REFRENCE ///
                     ///foreach ((string itemID, ObjectData itemData) in data)
                     ///{
@@ -296,6 +302,7 @@ namespace chaosaddon
                     /// Custom
                     data.Add("BEERSEEDS", Beer);
                     data.Add("CATBULBSEEDS", CATBULBCROP);
+                    data.Add("BOMBSEEDS", Bomb); 
                 });
 
 
@@ -315,7 +322,7 @@ namespace chaosaddon
 
                     data["SeedShop"].Items.Add(Beershop);
                     data["SeedShop"].Items.Add(CATBULBSEEDSHOP);
-
+                    data["SeedShop"].Items.Add(Bombshop);
 
                 });
             }
@@ -335,7 +342,7 @@ namespace chaosaddon
             //Game1.player.addItemToInventory((Item)new StardewValley.Object("288", 1, false, 10, 0));
             /// Misc threads
 
-            Misc.Start();
+            
             
 
             ///position change Game1.player.Position = new Vector2(800, 600);
@@ -896,63 +903,79 @@ namespace chaosaddon
         //MUSIC
         public void OSTBPM(object o)
         {
+            string track = "";
             bool running = false;
-            void wait(object b)
+            Action<object> wait = (j) => 
             {
-                Thread.Sleep(100);
+                string t = track;
+                Game1.showRedMessage("Great!",false);
+                for(int tim = 0; tim< 50; tim++)
+                {
+                    if(t != track)
+                    {
+                        break;
+                    }
+                    Thread.Sleep(1);
+                }
                 running = false;
-                Game1.showRedMessage("Great!");
-            }
+            };
+
 
             buffDataMusic = new BuffAttributesData();
             buffDataMusic.AttackMultiplier = 3;
             buffDataMusic.LuckLevel = 3;
 
             buffEffectsMusic = new BuffEffects(buffDataMusic);
-            musicAttack = new Buff("1337", "none", "none", 50, null, 20, buffEffectsMusic, false, "MusicBuff", "Only active now");
+            musicAttack = new Buff("1337", "none", "none", 200, null, 20, buffEffectsMusic, false, "MusicBuff", "Only active now");
             int val = 0;
             while (true)
             {
                 try
                 {
+                    track = Game1.getMusicTrackName();
 
-
-                    while (Game1.getMusicTrackName() != null && BPM.TryGetValue(Game1.getMusicTrackName(), out val) && Game1.player != null)
+                    while (Game1.getMusicTrackName() != null && BPM.TryGetValue(Game1.getMusicTrackName(), out val) && Game1.player != null && track == Game1.getMusicTrackName())
                     {
-                        running = false;
-                        int timer = 0;
-                        Thread.Sleep(val - 100);
-                        //Console.WriteLine("proc");
-                        musicAttack.millisecondsDuration = 100;
-                        //musicAttack.visible = false;
-                        Game1.player.applyBuff(musicAttack);
-
-                        
-
-                        Thread s = new Thread(new ParameterizedThreadStart(wait));
-
-                        while (timer < 100)
+                        val /= 2;
+                        for(int tim = 0; tim< val-100; tim++)
+                        {
+                            Thread.Sleep(1);
+                            if(Game1.getMusicTrackName() != track)
+                            {
+                                break;
+                            }
+                            
+                        }
+                        if(Game1.getMusicTrackName() == track)
                         {
                             
-                            if (Helper.Input.IsDown(SButton.MouseLeft) && running == false)
-                            {
-                                s.Start();
-                                Thread.Sleep(1);
-                                timer++;
-                                running = true;
-                                
 
-                            }
-                            else
+                            for(int tim = 0; tim< 200; tim++)
                             {
+                                if(tim == 50)
+                                {
+                                    musicAttack.millisecondsDuration = 50;
+                                    Game1.player.applyBuff(musicAttack);
+                                }
+                                
+                                if (Game1.getMusicTrackName() != track)
+                                {
+                                    break;
+                                }
+                                if(Helper.Input.IsDown(SButton.MouseLeft) && running == false)
+                                {
+                                    
+                                    running = true;
+                                    new Thread(new ParameterizedThreadStart(wait)).Start();
+                                }
+
                                 Thread.Sleep(1);
-                                timer++;
                             }
+
+
                         }
 
-
                         
-
                     }
                 }
                 catch (Exception e)
@@ -979,6 +1002,7 @@ namespace chaosaddon
         {
             //misc events
             Misc = new Thread(new ParameterizedThreadStart(MiscEvents));
+            Misc.Start();
             Music = new Thread(new ParameterizedThreadStart(OSTBPM));
             Music.Start();
            //data
@@ -1198,6 +1222,95 @@ namespace chaosaddon
             CATBULBSEEDSHOP.QualityModifierMode = StardewValley.GameData.QuantityModifier.QuantityModifierMode.Stack;
             CATBULBSEEDSHOP.ModData = null;
             CATBULBSEEDSHOP.PerItemCondition = null;
+
+
+            ///Bombseeds crop
+            Bomb.Seasons = new List<Season> { Season.Summer, Season.Winter };
+            Bomb.DaysInPhase = new List<int> { 1, 1, 1 };
+            Bomb.RegrowDays = -1;
+            Bomb.IsRaised = false;
+            Bomb.IsPaddyCrop = false;
+            Bomb.NeedsWatering = true;
+            Bomb.PlantableLocationRules = null;
+            Bomb.HarvestItemId = "287";
+            Bomb.HarvestMinStack = 1;
+            Bomb.HarvestMaxStack = 1;
+            Bomb.HarvestMaxIncreasePerFarmingLevel = 0f;
+            Bomb.ExtraHarvestChance = 0.0;
+            Bomb.HarvestMethod = HarvestMethod.Grab;
+            Bomb.HarvestMinQuality = 0;
+            Bomb.HarvestMaxQuality = null;
+            Bomb.Texture = "TileSheets\\crops";
+            Bomb.SpriteIndex = 53;
+            Bomb.CountForMonoculture = true;
+            Bomb.CountForPolyculture = true;
+            Bomb.CustomFields = null;
+
+            ///Bombseeds 
+
+            Bombseeds.Name = "Bomb Seeds";
+            Bombseeds.DisplayName = "Bomb Seeds";
+            Bombseeds.Description = "Easy way to get those rupees. Grows in summer or winter, and in 3 days.";
+            Bombseeds.Type = "Seeds";
+            Bombseeds.Category = -74;
+            Bombseeds.Price = 20;
+            Bombseeds.Texture = null;
+            Bombseeds.SpriteIndex = 938;
+            Bombseeds.Edibility = -300;
+            Bombseeds.IsDrink = false;
+            Bombseeds.Buffs = null;
+            Bombseeds.GeodeDropsDefaultItems = false;
+            Bombseeds.GeodeDrops = null;
+            Bombseeds.ArtifactSpotChances = null;
+            Bombseeds.CanBeGivenAsGift = true;
+            Bombseeds.CanBeTrashed = true;
+            Bombseeds.ExcludeFromFishingCollection = false;
+            Bombseeds.ExcludeFromShippingCollection = false;
+            Bombseeds.ExcludeFromRandomSale = false;
+            Bombseeds.ContextTags = null;
+            Bombseeds.CustomFields = null;
+
+            ///bombseeds shop
+            Bombshop.ActionsOnPurchase = null;
+            Bombshop.CustomFields = null;
+            Bombshop.TradeItemId = null;
+            Bombshop.TradeItemAmount = 1;
+            Bombshop.Price = 210;
+            Bombshop.ApplyProfitMargins = null;
+            Bombshop.AvailableStock = 30;
+            Bombshop.AvailableStockLimit = LimitedStockMode.Global;
+            Bombshop.AvoidRepeat = false;
+            Bombshop.UseObjectDataPrice = false;
+            Bombshop.IgnoreShopPriceModifiers = true;
+            Bombshop.PriceModifiers = null;
+            Bombshop.PriceModifierMode = StardewValley.GameData.QuantityModifier.QuantityModifierMode.Stack;
+            Bombshop.AvailableStockModifiers = null;
+            Bombshop.AvailableStockModifierMode = StardewValley.GameData.QuantityModifier.QuantityModifierMode.Stack;
+            Bombshop.Condition = "SEASON summer";
+            Bombshop.Id = "(O)BOMBSEEDS";
+            Bombshop.ItemId = "(O)BOMBSEEDS";
+            Bombshop.RandomItemId = null;
+            Bombshop.MaxItems = null;
+            Bombshop.MinStack = -1;
+            Bombshop.MaxStack = -1;
+            Bombshop.Quality = -1;
+            Bombshop.ObjectInternalName = null;
+            Bombshop.ObjectDisplayName = null;
+            Bombshop.ToolUpgradeLevel = -1;
+            Bombshop.IsRecipe = false;
+            Bombshop.StackModifiers = null;
+            Bombshop.StackModifierMode = StardewValley.GameData.QuantityModifier.QuantityModifierMode.Stack;
+            Bombshop.QualityModifiers = null;
+            Bombshop.QualityModifierMode = StardewValley.GameData.QuantityModifier.QuantityModifierMode.Stack;
+            Bombshop.ModData = null;
+            Bombshop.PerItemCondition = null;
+
+
+
+
+
+
+
 
 
             //Heroin buff
