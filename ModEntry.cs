@@ -952,11 +952,10 @@ namespace chaosaddon
 
                             for(int tim = 0; tim< 200; tim++)
                             {
-                                if(tim == 50)
-                                {
-                                    musicAttack.millisecondsDuration = 50;
+                                
+                                    musicAttack.millisecondsDuration = 200;
                                     Game1.player.applyBuff(musicAttack);
-                                }
+                                
                                 
                                 if (Game1.getMusicTrackName() != track)
                                 {
