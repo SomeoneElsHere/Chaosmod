@@ -13,4 +13,4 @@ New descriptions and prices for items! Yes I made a lot of things uh.. expensive
 
 Plus a mechanic that increases luck and damage for clicking along the BPM.
 
-(This mod does use Harmony Patching for the Catbulb item.)
+(This mod does use Harmony Patching for the Catbulb item and other stuff.)

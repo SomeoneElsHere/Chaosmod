@@ -42,9 +42,9 @@ using StardewValley.Buffs;
 using StardewValley.GameData.Buffs;
 
 
-// ADDD
-/// heroin
-/// set a timer for 4 minutes. use a temp varible that if CurseActive is ever false, temp is false. If temp is false, exit
+// TO-ADD LIST
+
+
 
 
 
@@ -92,9 +92,7 @@ namespace chaosaddon
         
 
         //items
-        /// heroin
-        ObjectData Heroin = new ObjectData();
-        ObjectBuffData HeroinBuff = new ObjectBuffData();
+        
         
 
         //CRAFTING RECIPES
@@ -249,7 +247,7 @@ namespace chaosaddon
                     data.Add("BEERSEEDS", Beerseeds);
                     data.Add("CATBULB", CATBULB);
                     data.Add("CATBULBSEEDS", CATBULBSEEDS);
-                    data.Add("HEROIN", Heroin);
+                    
                     data.Add("BOMBSEEDS", Bombseeds);
                     /// REFRENCE ///
                     ///foreach ((string itemID, ObjectData itemData) in data)
@@ -865,38 +863,11 @@ namespace chaosaddon
             
             switch(key)
             {
-                case "(O)HEROIN":
-                    if (!CurseTempActive)
-                    {
-                        Thread HeroinBuffThread = new Thread(new ParameterizedThreadStart(HeroinBuffMethod));
-                        HeroinBuffThread.Start();
-                        CurseTempActive = true;
-                    }
-                    
-                break;
+                
             }
         }
 
-        static public void HeroinBuffMethod(object o)
-        {
-            while(CurseTemp)
-            {
-            
-                try
-                {
-                    Game1.hudMessages.Add(new HUDMessage("You want drugs..."));
-                    Thread.Sleep(240000);
-                }
-                catch
-                {
-                    
-                    break;
-                }
-            }
-            CurseTemp = true;
-            CurseTempActive = false;
-           
-        }
+       
 
 
 
@@ -926,7 +897,7 @@ namespace chaosaddon
             buffDataMusic.LuckLevel = 3;
 
             buffEffectsMusic = new BuffEffects(buffDataMusic);
-            musicAttack = new Buff("1337", "none", "none", 200, null, 20, buffEffectsMusic, false, "MusicBuff", "Only active now");
+            
             int val = 0;
             while (true)
             {
@@ -952,9 +923,11 @@ namespace chaosaddon
 
                             for(int tim = 0; tim< 150; tim++)
                             {
+
+                                //musicAttack.millisecondsDuration = 150;
                                 
-                                    musicAttack.millisecondsDuration = 150;
-                                    Game1.player.applyBuff(musicAttack);
+                                
+                                    Game1.player.applyBuff(new Buff("1337", "none", "none", 150, null, 20, buffEffectsMusic, false, "MusicBuff", "Only active now"));
                                 
                                 
                                 if (Game1.getMusicTrackName() != track)
@@ -1312,27 +1285,6 @@ namespace chaosaddon
 
 
 
-            //Heroin buff
-            HeroinBuff.CustomAttributes = new StardewValley.GameData.Buffs.BuffAttributesData();
-            HeroinBuff.CustomAttributes.Defense = -2;
-            HeroinBuff.CustomAttributes.Speed = 2;
-            HeroinBuff.Duration = 240;
-
-
-            //Heroin
-
-            Heroin.Name = "Heroin";
-            Heroin.DisplayName = "Heroin?";
-            Heroin.Description = "Yes, it's heroi- wait, is this opium? Or wait, is it weed? Nonono, it must be-";
-            Heroin.Type = "Cooking";
-            Heroin.Category = -7;
-            Heroin.Price = 100;
-            Heroin.Texture = null;
-            Heroin.SpriteIndex = 0;   // fix, add to spring objects
-            Heroin.Edibility = 20;
-            Heroin.IsDrink = true;
-            Heroin.Buffs = new List<ObjectBuffData>();
-            Heroin.Buffs.Add(HeroinBuff);
             
             
            
