@@ -937,7 +937,7 @@ namespace chaosaddon
                     while (Game1.getMusicTrackName() != null && BPM.TryGetValue(Game1.getMusicTrackName(), out val) && Game1.player != null && track == Game1.getMusicTrackName())
                     {
                         val /= 2;
-                        for(int tim = 0; tim< val-100; tim++)
+                        for(int tim = 0; tim< val-75; tim++)
                         {
                             Thread.Sleep(1);
                             if(Game1.getMusicTrackName() != track)
@@ -950,10 +950,10 @@ namespace chaosaddon
                         {
                             
 
-                            for(int tim = 0; tim< 200; tim++)
+                            for(int tim = 0; tim< 150; tim++)
                             {
                                 
-                                    musicAttack.millisecondsDuration = 200;
+                                    musicAttack.millisecondsDuration = 150;
                                     Game1.player.applyBuff(musicAttack);
                                 
                                 
