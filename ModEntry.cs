@@ -78,7 +78,8 @@ namespace chaosaddon
         int randomvar_events1 = 1200; //Random chance in game, early
         int randomvar_events2 = 1800;  //random chance in game, late
 
-       static bool CurseTemp = true;
+        static bool GetValuesIsRunning = false;
+        static bool MusicAttackIsRunning = false;
         static bool CurseTempActive = false;
         bool CurseActive = false;  //Says when a curse should be active.
         int CurCurse = 5;  // The current curse (part of switch case logic)
@@ -134,6 +135,7 @@ namespace chaosaddon
             helper.Events.Player.InventoryChanged += this.OnInventoryChanged;
             
             var harmony = new Harmony(this.ModManifest.UniqueID);
+            //Harmony.DEBUG = true;
 
             harmony.Patch(
             original: AccessTools.Method(typeof(Slingshot), nameof(Slingshot.GetAmmoDamage)),
@@ -149,7 +151,9 @@ namespace chaosaddon
             original: AccessTools.Method(typeof(BuffManager), nameof(BuffManager.Update)),
             transpiler: new HarmonyMethod(typeof(ModEntry), nameof(BuffUpdate_Transpiler))
             );
+
             
+
         }
 
 
@@ -511,10 +515,7 @@ namespace chaosaddon
         private async void OnTimeChanged(object? sender, TimeChangedEventArgs e)
         {
 
-            if(!CurseActive)
-            {
-                CurseTemp = false;
-            }
+            
             //debug 
             //Game1.showGlobalMessage(""+ VolcanoDungeon.IsGeneratedLevel(Game1.player.currentLocation.Name, out int extrainfo2));
             //Game1.showGlobalMessage("" + Game1.player.experiencePoints[0]);
@@ -928,14 +929,15 @@ namespace chaosaddon
                         if(Game1.getMusicTrackName() == track)
                         {
                             
+                            musicAttack = new Buff("1337", "none", "none", 150, null, 20, buffEffectsMusic, false, "MusicBuff", "Only active now");
+                            Game1.player.applyBuff(musicAttack);
+                            MusicAttackIsRunning = true;
+                            
 
-                            for(int tim = 0; tim< 150; tim++)
+                            for (int tim = 0; tim< 150; tim++)
                             {
 
 
-
-                                musicAttack = new Buff("1337", "none", "none", 150, null, 20, buffEffectsMusic, false, "MusicBuff", "Only active now");
-                                    Game1.player.applyBuff(musicAttack);
                                 
                                 
                                 if (Game1.getMusicTrackName() != track)
@@ -1385,7 +1387,7 @@ namespace chaosaddon
                 d.labels.Add(l);
 
 
-            Console.WriteLine("instatation sucessful");
+            
 
 
             matcher.MatchStartForward(
@@ -1408,17 +1410,30 @@ namespace chaosaddon
                 
                 
 
-            Console.WriteLine("Labels sucessfull");
+          
 
             return matcher.InstructionEnumeration();
         }
+
+        
+
+
+
+
+
+
+
+
 
 
 
     }
 
+
+
+
    
-     
+
 }
 
 
