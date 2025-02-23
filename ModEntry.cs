@@ -40,6 +40,9 @@ using StardewValley.GameData;
 using StardewValley.GameData.Locations;
 using StardewValley.Buffs;
 using StardewValley.GameData.Buffs;
+using System.Reflection.Emit;
+using System.Reflection;
+using StardewValley.Minigames;
 
 
 // TO-ADD LIST
@@ -132,7 +135,6 @@ namespace chaosaddon
             
             var harmony = new Harmony(this.ModManifest.UniqueID);
 
-
             harmony.Patch(
             original: AccessTools.Method(typeof(Slingshot), nameof(Slingshot.GetAmmoDamage)),
             prefix: new HarmonyMethod(typeof(ModEntry), nameof(GetAmmoDamage_Prefix))
@@ -142,6 +144,12 @@ namespace chaosaddon
             original: AccessTools.Method(typeof(Farmer), nameof(Farmer.eatObject)),
             prefix: new HarmonyMethod(typeof(ModEntry), nameof(GeteatObject))
             );
+
+            harmony.Patch(
+            original: AccessTools.Method(typeof(BuffManager), nameof(BuffManager.Update)),
+            transpiler: new HarmonyMethod(typeof(ModEntry), nameof(BuffUpdate_Transpiler))
+            );
+            
         }
 
 
@@ -924,10 +932,10 @@ namespace chaosaddon
                             for(int tim = 0; tim< 150; tim++)
                             {
 
-                                //musicAttack.millisecondsDuration = 150;
-                                
-                                
-                                    Game1.player.applyBuff(new Buff("1337", "none", "none", 150, null, 20, buffEffectsMusic, false, "MusicBuff", "Only active now"));
+
+
+                                musicAttack = new Buff("1337", "none", "none", 150, null, 20, buffEffectsMusic, false, "MusicBuff", "Only active now");
+                                    Game1.player.applyBuff(musicAttack);
                                 
                                 
                                 if (Game1.getMusicTrackName() != track)
@@ -957,7 +965,13 @@ namespace chaosaddon
                         Thread.Sleep(1);
                         //Console.WriteLine("fail");
                     }
+                    if (Game1.getMusicTrackName() != null)
+                    {
+                        Console.WriteLine("Chaosaddon: Ah fuck. Something in the method \"OSTBPM\" went wrong.");
+
+                    }
                 }
+                
             }
         }
 
@@ -1356,6 +1370,51 @@ namespace chaosaddon
                 
             }
         }
+
+        // transpliers. (sigh)
+
+        public static IEnumerable<CodeInstruction> BuffUpdate_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+        {
+            CodeMatcher matcher = new(instructions);
+            
+            MethodInfo getAppliedID = AccessTools.PropertyGetter(typeof(StardewValley.Buffs.BuffManager), nameof(BuffManager.AppliedBuffIds));
+            MethodInfo getGetCount = AccessTools.PropertyGetter(typeof(Netcode.NetList<string,Netcode.NetString>), nameof(NetList<string,NetString>.Count));
+
+            Label l = generator.DefineLabel();
+            CodeInstruction d = new CodeInstruction(OpCodes.Nop);
+                d.labels.Add(l);
+
+
+            Console.WriteLine("instatation sucessful");
+
+
+            matcher.MatchStartForward(
+                new CodeMatch(OpCodes.Ldarg_0),
+                new CodeMatch(OpCodes.Ldfld, getAppliedID),
+                new CodeMatch(OpCodes.Ldloc_0)
+                )
+                .ThrowIfNotMatch($"Could not find entry point for {nameof(BuffUpdate_Transpiler)}")
+                .Advance(5)
+                .Insert(
+                    new CodeInstruction(OpCodes.Ldloc_1),
+                    new CodeInstruction(OpCodes.Ldnull),
+                    new CodeInstruction(OpCodes.Ceq),
+                    new CodeInstruction(OpCodes.Brtrue, l)
+                    
+                    
+                )
+                .Advance(27+3+3)
+                .Insert(d);
+                
+                
+
+            Console.WriteLine("Labels sucessfull");
+
+            return matcher.InstructionEnumeration();
+        }
+
+
+
     }
 
    
