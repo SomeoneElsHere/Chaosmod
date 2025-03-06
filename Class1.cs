@@ -44,9 +44,9 @@ namespace chaosaddon
                     }
                 }
             }
-
+            sw.Close();
         }
-
+        
         public static Dictionary<string, int> getData()
         {
             return BPM;
