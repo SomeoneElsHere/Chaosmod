@@ -1,3 +1,0 @@
-In the stardew valley content folder, (C:\Program Files (x86)\Steam\steamapps\common\Stardew Valley\Content) there are separate folders in which the xnb files go. 
-Each folder name in the XNB folder matches with the folder that exists in the Content folder. 
-Put the files in the matching places, but don't forget to back up those original files just in case so you don't have to reinstall stardew valley in order to deinstall the xnb modifications.
