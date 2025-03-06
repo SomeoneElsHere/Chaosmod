@@ -103,24 +103,25 @@ namespace chaosaddon
         CraftingRecipe Wood1;
 
         //CROPS
+        /*
         ///BOMBSEEDS
         CropData Bomb = new CropData();
         ObjectData Bombseeds = new ObjectData();
         ShopItemData Bombshop = new ShopItemData();
-
+        */
 
         ///BEERSEEDS
         CropData Beer = new CropData();
         ObjectData Beerseeds = new ObjectData();
         ShopItemData Beershop = new ShopItemData();
 
-
+        /*
         ///CATBULB
         CropData CATBULBCROP = new CropData();
         ObjectData CATBULBSEEDS = new ObjectData();
         ObjectData CATBULB = new ObjectData();
         ShopItemData CATBULBSEEDSHOP = new ShopItemData();
-
+        */
 
         public override void Entry(IModHelper helper)
         {
@@ -136,12 +137,12 @@ namespace chaosaddon
             
             var harmony = new Harmony(this.ModManifest.UniqueID);
             //Harmony.DEBUG = true;
-
+            /*
             harmony.Patch(
             original: AccessTools.Method(typeof(Slingshot), nameof(Slingshot.GetAmmoDamage)),
             prefix: new HarmonyMethod(typeof(ModEntry), nameof(GetAmmoDamage_Prefix))
             );
-
+            */
             harmony.Patch(
             original: AccessTools.Method(typeof(Farmer), nameof(Farmer.eatObject)),
             prefix: new HarmonyMethod(typeof(ModEntry), nameof(GeteatObject))
@@ -257,10 +258,10 @@ namespace chaosaddon
                     /// custom
 
                     data.Add("BEERSEEDS", Beerseeds);
-                    data.Add("CATBULB", CATBULB);
-                    data.Add("CATBULBSEEDS", CATBULBSEEDS);
+                   // data.Add("CATBULB", CATBULB);
+                   // data.Add("CATBULBSEEDS", CATBULBSEEDS);
                     
-                    data.Add("BOMBSEEDS", Bombseeds);
+                   // data.Add("BOMBSEEDS", Bombseeds);
                     /// REFRENCE ///
                     ///foreach ((string itemID, ObjectData itemData) in data)
                     ///{
@@ -311,8 +312,8 @@ namespace chaosaddon
 
                     /// Custom
                     data.Add("BEERSEEDS", Beer);
-                    data.Add("CATBULBSEEDS", CATBULBCROP);
-                    data.Add("BOMBSEEDS", Bomb); 
+                    //data.Add("CATBULBSEEDS", CATBULBCROP);
+                   // data.Add("BOMBSEEDS", Bomb); 
                 });
 
 
@@ -331,8 +332,8 @@ namespace chaosaddon
                     ///Beerseeds 
 
                     data["SeedShop"].Items.Add(Beershop);
-                    data["SeedShop"].Items.Add(CATBULBSEEDSHOP);
-                    data["SeedShop"].Items.Add(Bombshop);
+                   //data["SeedShop"].Items.Add(CATBULBSEEDSHOP);
+                   // data["SeedShop"].Items.Add(Bombshop);
 
                 });
             }
@@ -1102,7 +1103,7 @@ namespace chaosaddon
             Beershop.ModData = null;
             Beershop.PerItemCondition = null;
 
-
+            /*
             ///Cat bulb
             ///
             ///CATBULB OBJ
@@ -1293,8 +1294,8 @@ namespace chaosaddon
             Bombshop.ModData = null;
             Bombshop.PerItemCondition = null;
 
-
-
+            
+            */
 
 
 
@@ -1337,7 +1338,7 @@ namespace chaosaddon
         
 
         ///Slingshot for CATBULB
-
+        /*
         public static bool GetAmmoDamage_Prefix(StardewValley.Object ammunition, ref int __result)
         {
             try
@@ -1358,7 +1359,7 @@ namespace chaosaddon
                 return true;
             }
         }
-
+        */
         /// Special buffs
         public static void GeteatObject(StardewValley.Object o, bool overrideFullness = false)
         {
