@@ -93,11 +93,11 @@ namespace chaosaddon
 
         BuffEffects buffEffectsMusic;
         Buff musicAttack;
-        
+
 
         //items
-        
-        
+
+
 
         //CRAFTING RECIPES
         CraftingRecipe Wood1;
@@ -133,7 +133,7 @@ namespace chaosaddon
             helper.Events.GameLoop.TimeChanged += this.OnTimeChanged;
             helper.Events.GameLoop.DayEnding += this.OnDayEnding;
             helper.Events.Player.InventoryChanged += this.OnInventoryChanged;
-            
+
             var harmony = new Harmony(this.ModManifest.UniqueID);
             //Harmony.DEBUG = true;
 
@@ -147,12 +147,13 @@ namespace chaosaddon
             prefix: new HarmonyMethod(typeof(ModEntry), nameof(GeteatObject))
             );
 
+            /*
             harmony.Patch(
             original: AccessTools.Method(typeof(BuffManager), nameof(BuffManager.Update)),
             transpiler: new HarmonyMethod(typeof(ModEntry), nameof(BuffUpdate_Transpiler))
             );
+            */
 
-            
 
         }
 
@@ -224,7 +225,7 @@ namespace chaosaddon
                     /// cranberries
                     data["282"].Name = "Holly Berries";
                     data["282"].Edibility = -50;
-                    
+
 
                     /// MATERIALS
 
@@ -234,7 +235,7 @@ namespace chaosaddon
                     /// wood
                     data["388"].Price = 2;
                     data["388"].Description = "Woody.";
-                   
+
                     /// hard wood (Owo)
                     data["709"].Price = 1;
                     data["709"].Description = "Don't you dare snicker at me, this is some good wood right here.";
@@ -251,7 +252,7 @@ namespace chaosaddon
 
                     /// OTHER
                     /// purple shorts
-                    
+
 
 
                     /// custom
@@ -259,7 +260,7 @@ namespace chaosaddon
                     data.Add("BEERSEEDS", Beerseeds);
                     data.Add("CATBULB", CATBULB);
                     data.Add("CATBULBSEEDS", CATBULBSEEDS);
-                    
+
                     data.Add("BOMBSEEDS", Bombseeds);
                     /// REFRENCE ///
                     ///foreach ((string itemID, ObjectData itemData) in data)
@@ -299,7 +300,7 @@ namespace chaosaddon
                     var Cauli = data["474"];
                     Cauli.DaysInPhase = new List<int> { 0, 0, 0, 6, 6 };
                     Cauli.IsRaised = true;
-                    
+
 
 
 
@@ -312,7 +313,7 @@ namespace chaosaddon
                     /// Custom
                     data.Add("BEERSEEDS", Beer);
                     data.Add("CATBULBSEEDS", CATBULBCROP);
-                    data.Add("BOMBSEEDS", Bomb); 
+                    data.Add("BOMBSEEDS", Bomb);
                 });
 
 
@@ -337,7 +338,7 @@ namespace chaosaddon
                 });
             }
 
-           
+
         }
 
         /// START OF DAY CHANGES 
@@ -346,14 +347,14 @@ namespace chaosaddon
             //debug
             SoundBank soundBank = this.Helper.Reflection.GetField<SoundBank>(Game1.soundBank, "soundBank").GetValue();
             IEnumerable<CueDefinition> cues = this.Helper.Reflection.GetField<Dictionary<string, CueDefinition>>(soundBank, "_cues").GetValue().Values;
-            
 
-            
+
+
             //Game1.player.addItemToInventory((Item)new StardewValley.Object("288", 1, false, 10, 0));
             /// Misc threads
 
-            
-            
+
+
 
             ///position change Game1.player.Position = new Vector2(800, 600);
             if (Game1.season == Season.Spring && Game1.year == 1 && Game1.dayOfMonth <= 10)
@@ -363,7 +364,7 @@ namespace chaosaddon
 
             ///Game1.showGlobalMessage();
             ///
-            
+
 
 
 
@@ -415,13 +416,13 @@ namespace chaosaddon
                     Blue.Start();
                     Game1.hudMessages.Add(new HUDMessage("Your blue aba dee aba die"));
                     break;
-                case 3: 
+                case 3:
                     Seasonal = new Thread(new ParameterizedThreadStart(SeasonalCurse));
                     Seasonal.Start();
                     break;
 
             }
-            
+
         }
 
 
@@ -494,7 +495,7 @@ namespace chaosaddon
         /// CONSTANT CHANGES
         private void OnUpdateTicked(object? sender, UpdateTickedEventArgs e)
         {
-            
+
         }
 
         /// EXP
@@ -505,7 +506,7 @@ namespace chaosaddon
                 if (Game1.player.CurrentTool.QualifiedItemId == "(T)Hoe")
                     GainExpHoe = true;
                 else
-                    GainExpHoe= false;
+                    GainExpHoe = false;
 
         }
 
@@ -515,7 +516,7 @@ namespace chaosaddon
         private async void OnTimeChanged(object? sender, TimeChangedEventArgs e)
         {
 
-            
+
             //debug 
             //Game1.showGlobalMessage(""+ VolcanoDungeon.IsGeneratedLevel(Game1.player.currentLocation.Name, out int extrainfo2));
             //Game1.showGlobalMessage("" + Game1.player.experiencePoints[0]);
@@ -531,7 +532,7 @@ namespace chaosaddon
                         break;
                     case 1:
 
-                        if (Game1.isRaining && !Game1.isDebrisWeather )
+                        if (Game1.isRaining && !Game1.isDebrisWeather)
                         {
                             Game1.showGlobalMessage("Time to take-a Piss!");
                             if (Game1.season != StardewValley.Season.Winter)
@@ -547,10 +548,10 @@ namespace chaosaddon
                             else
                                 Game1.isSnowing = false;
                         }
-                            break;
+                        break;
                     case 2:
                         Game1.player.addItemToInventory(RandomItem());  //adds random item
-                        break;    
+                        break;
                     case 3:
                         Monster HA;
                         try
@@ -563,7 +564,7 @@ namespace chaosaddon
                         }
                         catch (Exception ex)  // if  the vector2 does not exist
                         {
-                           
+
                         }
                         break;
                     case 4:
@@ -578,16 +579,16 @@ namespace chaosaddon
                         break;
                     case 7:
                         int health = Game1.player.health;
-                        if (health/2 == 0)      // snaps your health in half.
+                        if (health / 2 == 0)      // snaps your health in half.
                         {
                             Game1.player.health = 1;
                         }
                         else
                         {
-                            Game1.player.health /= 2;  
+                            Game1.player.health /= 2;
                         }
                         Game1.hudMessages.Add(new HUDMessage("The fuck?"));
-                        Game1.showGlobalMessage(Game1.player.Name+" got their health snapped in half.");
+                        Game1.showGlobalMessage(Game1.player.Name + " got their health snapped in half.");
                         break;
                     case 8:
                         Game1.player.addedSpeed -= 3; //subtracts speed
@@ -599,7 +600,7 @@ namespace chaosaddon
                         }
                         else
                         {
-                            Thread Peter = new Thread(new ParameterizedThreadStart(PeterEvent));  
+                            Thread Peter = new Thread(new ParameterizedThreadStart(PeterEvent));
                             Peter.Start(); //starts a peter griffin event if not in a dungeon or mineshaft. (see PeterEvent)
 
                         }
@@ -652,10 +653,10 @@ namespace chaosaddon
                             Game1.hudMessages.Add(new HUDMessage("250 gold subtracted for some reason."));
                         }
                         break;
-                        
 
 
-                  
+
+
 
 
                 }
@@ -664,7 +665,7 @@ namespace chaosaddon
 
             //EXP
 
-            
+
         }
 
         // NEW METHODS
@@ -672,20 +673,20 @@ namespace chaosaddon
         public static Item RandomItem()
         {
             string itemnum;
-            
-                itemnum = "" + new Random().Next(0, 900);
-                Item x =(Item)new StardewValley.Object(itemnum, 1, false, 10, 0);
-                if (x.Name == "Error Item")
-                {
-                    return RandomItem();
-                }
+
+            itemnum = "" + new Random().Next(0, 900);
+            Item x = (Item)new StardewValley.Object(itemnum, 1, false, 10, 0);
+            if (x.Name == "Error Item")
+            {
+                return RandomItem();
+            }
             return x;
-            
+
         }
 
-        
+
         // EVENTS
-        public static void PeterEvent (object obj)
+        public static void PeterEvent(object obj)
         {
             Game1.player.jump();
             Game1.player.canMove = false;
@@ -700,14 +701,14 @@ namespace chaosaddon
             Game1.timeOfDay += 200;
         }
 
-        public void MiscEvents (object obj)
+        public void MiscEvents(object obj)
         {
             while (true)
             {
 
-                
 
-                
+
+
                 try
                 {
                     // EXP
@@ -721,15 +722,15 @@ namespace chaosaddon
                             GainExpHoe = false;
                         }
 
-                    
-                    
+
+
                 }
                 catch (NullReferenceException e)
                 {
                     break;
                 }
 
-               
+
             }
         }
 
@@ -737,7 +738,7 @@ namespace chaosaddon
 
         public void SuperSpeedCurse(object obj)
         {
-            
+
             while (CurseActive)
             {
                 try
@@ -749,7 +750,7 @@ namespace chaosaddon
                     break;
                 }
             }
-            
+
         }
 
         public void JumpCurse(object obj)
@@ -778,7 +779,7 @@ namespace chaosaddon
             }
             catch (NullReferenceException e)
             {
-               
+
             }
         }
         public void BlueCurse(object obj)
@@ -796,9 +797,9 @@ namespace chaosaddon
 
                 while (CurseActive)
                 {
-                    
+
                     Thread.Sleep(100);
-                    
+
                 }
                 ///reverting data
                 Game1.player.changeSkinColor(SkinOG);
@@ -813,7 +814,8 @@ namespace chaosaddon
 
         public void SeasonalCurse(object obj)  /// 
         {
-            try {
+            try
+            {
                 if (Game1.season == Season.Spring)
                 {
                     while (CurseActive)
@@ -869,14 +871,14 @@ namespace chaosaddon
         //SPECIAL BUFFS
         static public void BuffMethod(string key)
         {
-            
-            switch(key)
+
+            switch (key)
             {
-                
+
             }
         }
 
-       
+
 
 
 
@@ -885,13 +887,13 @@ namespace chaosaddon
         {
             string track = "";
             bool running = false;
-            Action<object> wait = (j) => 
+            Action<object> wait = (j) =>
             {
                 string t = track;
-                Game1.showRedMessage("Great!",false);
-                for(int tim = 0; tim< 50; tim++)
+                Game1.showRedMessage("Great!", false);
+                for (int tim = 0; tim < 50; tim++)
                 {
-                    if(t != track)
+                    if (t != track)
                     {
                         break;
                     }
@@ -906,7 +908,7 @@ namespace chaosaddon
             buffDataMusic.LuckLevel = 3;
 
             buffEffectsMusic = new BuffEffects(buffDataMusic);
-            
+
             int val = 0;
             while (true)
             {
@@ -917,36 +919,36 @@ namespace chaosaddon
                     while (Game1.getMusicTrackName() != null && BPM.TryGetValue(Game1.getMusicTrackName(), out val) && Game1.player != null && track == Game1.getMusicTrackName())
                     {
                         val /= 2;
-                        for(int tim = 0; tim< val-75; tim++)
+                        for (int tim = 0; tim < val - 75; tim++)
                         {
                             Thread.Sleep(1);
-                            if(Game1.getMusicTrackName() != track)
+                            if (Game1.getMusicTrackName() != track)
                             {
                                 break;
                             }
-                            
+
                         }
-                        if(Game1.getMusicTrackName() == track)
+                        if (Game1.getMusicTrackName() == track)
                         {
-                            
+
                             musicAttack = new Buff("1337", "none", "none", 150, null, 20, buffEffectsMusic, false, "MusicBuff", "Only active now");
                             Game1.player.applyBuff(musicAttack);
                             MusicAttackIsRunning = true;
-                            
 
-                            for (int tim = 0; tim< 150; tim++)
+
+                            for (int tim = 0; tim < 150; tim++)
                             {
 
 
-                                
-                                
+
+
                                 if (Game1.getMusicTrackName() != track)
                                 {
                                     break;
                                 }
-                                if(Helper.Input.IsDown(SButton.MouseLeft) && running == false)
+                                if (Helper.Input.IsDown(SButton.MouseLeft) && running == false)
                                 {
-                                    
+
                                     running = true;
                                     new Thread(new ParameterizedThreadStart(wait)).Start();
                                 }
@@ -957,12 +959,12 @@ namespace chaosaddon
 
                         }
 
-                        
+
                     }
                 }
                 catch (Exception e)
                 {
-                    while(!(Game1.getMusicTrackName() != null && BPM.TryGetValue(Game1.getMusicTrackName(), out val) && Game1.player != null))
+                    while (!(Game1.getMusicTrackName() != null && BPM.TryGetValue(Game1.getMusicTrackName(), out val) && Game1.player != null))
                     {
                         Thread.Sleep(1);
                         //Console.WriteLine("fail");
@@ -973,7 +975,7 @@ namespace chaosaddon
 
                     }
                 }
-                
+
             }
         }
 
@@ -982,7 +984,7 @@ namespace chaosaddon
             Thread.Sleep(time);
             return true;
         }
-        
+
 
 
         // NEW CHANGES
@@ -993,12 +995,12 @@ namespace chaosaddon
             Misc.Start();
             Music = new Thread(new ParameterizedThreadStart(OSTBPM));
             Music.Start();
-           //data
+            //data
 
             BPMData.initalize();
             BPM = BPMData.getData();
 
-            
+
 
 
 
@@ -1022,7 +1024,7 @@ namespace chaosaddon
             /// BEER SEEDS
             /// Beer SEEDS CROPDATA
 
-            Beer.Seasons = new List<Season> { Season.Spring,Season.Fall };
+            Beer.Seasons = new List<Season> { Season.Spring, Season.Fall };
 
             Beer.DaysInPhase = new List<int> { 0, 0, 0, 0 };
             Beer.RegrowDays = -1;
@@ -1301,40 +1303,40 @@ namespace chaosaddon
 
 
 
-            
-            
-           
 
-            
+
+
+
+
         }
 
 
-        
 
-        
 
-        
+
+
+
         ///////////HARMONY PATCHING//////////////
 
         ///coding c# use, remember to comment out
         //StardewValley.Tools.Slingshot
         //public virtual int GetAmmoDamage(Object ammunition)
-       // {
-         //   return ammunition?.QualifiedItemId switch
+        // {
+        //   return ammunition?.QualifiedItemId switch
         //    {
-          //      "(O)388" => 2,
-           //     "(O)390" => 5,
-          //      "(O)378" => 10,
-          //      "(O)380" => 20,
-         //       "(O)384" => 30,
-         //       "(O)382" => 15,
-         //       "(O)386" => 50,
-         //       "(O)441" => 20,
+        //      "(O)388" => 2,
+        //     "(O)390" => 5,
+        //      "(O)378" => 10,
+        //      "(O)380" => 20,
+        //       "(O)384" => 30,
+        //       "(O)382" => 15,
+        //       "(O)386" => 50,
+        //       "(O)441" => 20,
         //        _ => 1,
         //    };
         ///}
-        
-        
+
+
 
         ///Slingshot for CATBULB
 
@@ -1369,12 +1371,12 @@ namespace chaosaddon
             catch (Exception e)
             {
                 Console.WriteLine("Chaosaddon: Ah fuck. Something in the Harmony patch \"GeteatObject\" went wrong.");
-                
+
             }
         }
 
         // transpliers. (sigh)
-
+        /*
         public static IEnumerable<CodeInstruction> BuffUpdate_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
             CodeMatcher matcher = new(instructions);
@@ -1415,7 +1417,7 @@ namespace chaosaddon
             return matcher.InstructionEnumeration();
         }
 
-        
+        */
 
 
 
@@ -1432,23 +1434,6 @@ namespace chaosaddon
 
 
 
-   
+
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
