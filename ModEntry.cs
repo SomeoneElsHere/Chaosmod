@@ -147,12 +147,12 @@ namespace chaosaddon
             original: AccessTools.Method(typeof(Farmer), nameof(Farmer.eatObject)),
             prefix: new HarmonyMethod(typeof(ModEntry), nameof(GeteatObject))
             );
-
+/*
             harmony.Patch(
             original: AccessTools.Method(typeof(BuffManager), nameof(BuffManager.Update)),
             transpiler: new HarmonyMethod(typeof(ModEntry), nameof(BuffUpdate_Transpiler))
             );
-
+*/
             
 
         }
@@ -1375,7 +1375,7 @@ namespace chaosaddon
         }
 
         // transpliers. (sigh)
-
+        /*
         public static IEnumerable<CodeInstruction> BuffUpdate_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
             CodeMatcher matcher = new(instructions);
@@ -1390,7 +1390,7 @@ namespace chaosaddon
 
             
 
-
+            /*
             matcher.MatchStartForward(
                 new CodeMatch(OpCodes.Ldarg_0),
                 new CodeMatch(OpCodes.Ldfld, getAppliedID),
@@ -1417,7 +1417,7 @@ namespace chaosaddon
         }
 
         
-
+    */
 
 
 
