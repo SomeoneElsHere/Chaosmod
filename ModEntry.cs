@@ -1,51 +1,25 @@
 ﻿using StardewValley;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using StardewModdingAPI.Utilities;
 using StardewValley.GameData.Objects;
 using StardewValley.GameData.Crops;
-using StardewValley.GameData.Tools;
-using StardewModdingAPI.Framework.ModLoading.Rewriters.StardewValley_1_6;
 using StardewValley.Locations;
 using StardewValley.GameData.Shops;
-using StardewValley.GameData.Weapons;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Netcode;
-using StardewValley.ItemTypeDefinitions;
-using StardewValley.Projectiles;
-using System.Xml.Serialization;
 using HarmonyLib;
 using StardewValley.Tools;
-using StardewValley.GameData.SpecialOrders;
-using System.Runtime.CompilerServices;
 using StardewValley.Monsters;
 using Microsoft.Xna.Framework.Audio;
-using StardewValley.Network;
-using StardewValley.Menus;
-using System.Linq.Expressions;
-using System.Timers;
-using xTile.Tiles;
-using StardewValley.Inventories;
-using StardewValley.GameData.BigCraftables;
-using Microsoft.Xna.Framework.Media;
-using StardewValley.GameData;
-using StardewValley.GameData.Locations;
 using StardewValley.Buffs;
 using StardewValley.GameData.Buffs;
-using System.Reflection.Emit;
-using System.Reflection;
-using StardewValley.Minigames;
+using System.Security.Cryptography;
+using Microsoft.Xna.Framework.Graphics;
+using System.Diagnostics;
+
 
 
 // TO-ADD LIST
+
 
 
 
@@ -93,35 +67,34 @@ namespace chaosaddon
 
         BuffEffects buffEffectsMusic;
         Buff musicAttack;
-        
+
 
         //items
-        
-        
+
+
 
         //CRAFTING RECIPES
         CraftingRecipe Wood1;
 
         //CROPS
-        /*
         ///BOMBSEEDS
         CropData Bomb = new CropData();
         ObjectData Bombseeds = new ObjectData();
         ShopItemData Bombshop = new ShopItemData();
-        */
+
 
         ///BEERSEEDS
         CropData Beer = new CropData();
         ObjectData Beerseeds = new ObjectData();
         ShopItemData Beershop = new ShopItemData();
 
-        /*
+
         ///CATBULB
         CropData CATBULBCROP = new CropData();
         ObjectData CATBULBSEEDS = new ObjectData();
         ObjectData CATBULB = new ObjectData();
         ShopItemData CATBULBSEEDSHOP = new ShopItemData();
-        */
+
 
         public override void Entry(IModHelper helper)
         {
@@ -134,26 +107,27 @@ namespace chaosaddon
             helper.Events.GameLoop.TimeChanged += this.OnTimeChanged;
             helper.Events.GameLoop.DayEnding += this.OnDayEnding;
             helper.Events.Player.InventoryChanged += this.OnInventoryChanged;
-            
+
             var harmony = new Harmony(this.ModManifest.UniqueID);
             //Harmony.DEBUG = true;
-            /*
+
             harmony.Patch(
             original: AccessTools.Method(typeof(Slingshot), nameof(Slingshot.GetAmmoDamage)),
             prefix: new HarmonyMethod(typeof(ModEntry), nameof(GetAmmoDamage_Prefix))
             );
-            */
+
             harmony.Patch(
             original: AccessTools.Method(typeof(Farmer), nameof(Farmer.eatObject)),
             prefix: new HarmonyMethod(typeof(ModEntry), nameof(GeteatObject))
             );
-/*
+
+            /*
             harmony.Patch(
             original: AccessTools.Method(typeof(BuffManager), nameof(BuffManager.Update)),
             transpiler: new HarmonyMethod(typeof(ModEntry), nameof(BuffUpdate_Transpiler))
             );
-*/
-            
+            */
+
 
         }
 
@@ -225,7 +199,7 @@ namespace chaosaddon
                     /// cranberries
                     data["282"].Name = "Holly Berries";
                     data["282"].Edibility = -50;
-                    
+
 
                     /// MATERIALS
 
@@ -235,7 +209,7 @@ namespace chaosaddon
                     /// wood
                     data["388"].Price = 2;
                     data["388"].Description = "Woody.";
-                   
+
                     /// hard wood (Owo)
                     data["709"].Price = 1;
                     data["709"].Description = "Don't you dare snicker at me, this is some good wood right here.";
@@ -252,16 +226,16 @@ namespace chaosaddon
 
                     /// OTHER
                     /// purple shorts
-                    
+
 
 
                     /// custom
 
                     data.Add("BEERSEEDS", Beerseeds);
-                   // data.Add("CATBULB", CATBULB);
-                   // data.Add("CATBULBSEEDS", CATBULBSEEDS);
-                    
-                   // data.Add("BOMBSEEDS", Bombseeds);
+                    data.Add("CATBULB", CATBULB);
+                    data.Add("CATBULBSEEDS", CATBULBSEEDS);
+
+                    data.Add("BOMBSEEDS", Bombseeds);
                     /// REFRENCE ///
                     ///foreach ((string itemID, ObjectData itemData) in data)
                     ///{
@@ -300,7 +274,7 @@ namespace chaosaddon
                     var Cauli = data["474"];
                     Cauli.DaysInPhase = new List<int> { 0, 0, 0, 6, 6 };
                     Cauli.IsRaised = true;
-                    
+
 
 
 
@@ -312,8 +286,8 @@ namespace chaosaddon
 
                     /// Custom
                     data.Add("BEERSEEDS", Beer);
-                    //data.Add("CATBULBSEEDS", CATBULBCROP);
-                   // data.Add("BOMBSEEDS", Bomb); 
+                    data.Add("CATBULBSEEDS", CATBULBCROP);
+                    data.Add("BOMBSEEDS", Bomb);
                 });
 
 
@@ -332,29 +306,31 @@ namespace chaosaddon
                     ///Beerseeds 
 
                     data["SeedShop"].Items.Add(Beershop);
-                   //data["SeedShop"].Items.Add(CATBULBSEEDSHOP);
-                   // data["SeedShop"].Items.Add(Bombshop);
+                    data["SeedShop"].Items.Add(CATBULBSEEDSHOP);
+                    data["SeedShop"].Items.Add(Bombshop);
 
                 });
             }
 
-           
+
         }
 
         /// START OF DAY CHANGES 
         private void OnDayStarted(object? sender, DayStartedEventArgs e)
         {
+            //Thread teleport = new Thread(new ParameterizedThreadStart(randomWarpEvent));
+            //teleport.Start(); //starts a teleport (see randomWarpEvent)
             //debug
             SoundBank soundBank = this.Helper.Reflection.GetField<SoundBank>(Game1.soundBank, "soundBank").GetValue();
             IEnumerable<CueDefinition> cues = this.Helper.Reflection.GetField<Dictionary<string, CueDefinition>>(soundBank, "_cues").GetValue().Values;
-            
 
-            
+
+
             //Game1.player.addItemToInventory((Item)new StardewValley.Object("288", 1, false, 10, 0));
             /// Misc threads
 
-            
-            
+
+
 
             ///position change Game1.player.Position = new Vector2(800, 600);
             if (Game1.season == Season.Spring && Game1.year == 1 && Game1.dayOfMonth <= 10)
@@ -364,7 +340,7 @@ namespace chaosaddon
 
             ///Game1.showGlobalMessage();
             ///
-            
+
 
 
 
@@ -416,13 +392,13 @@ namespace chaosaddon
                     Blue.Start();
                     Game1.hudMessages.Add(new HUDMessage("Your blue aba dee aba die"));
                     break;
-                case 3: 
+                case 3:
                     Seasonal = new Thread(new ParameterizedThreadStart(SeasonalCurse));
                     Seasonal.Start();
                     break;
 
             }
-            
+
         }
 
 
@@ -495,7 +471,7 @@ namespace chaosaddon
         /// CONSTANT CHANGES
         private void OnUpdateTicked(object? sender, UpdateTickedEventArgs e)
         {
-            
+
         }
 
         /// EXP
@@ -506,13 +482,13 @@ namespace chaosaddon
                 if (Game1.player.CurrentTool.QualifiedItemId == "(T)Hoe")
                     GainExpHoe = true;
                 else
-                    GainExpHoe= false;
+                    GainExpHoe = false;
 
         }
 
 
 
-        /// Chaos random-chance events
+           /// Chaos random-chance events
         private async void OnTimeChanged(object? sender, TimeChangedEventArgs e)
         {
 
@@ -532,7 +508,7 @@ namespace chaosaddon
                         break;
                     case 1:
 
-                        if (Game1.isRaining && !Game1.isDebrisWeather )
+                        if (Game1.isRaining && !Game1.isDebrisWeather)
                         {
                             Game1.showGlobalMessage("Time to take-a Piss!");
                             if (Game1.season != StardewValley.Season.Winter)
@@ -548,10 +524,10 @@ namespace chaosaddon
                             else
                                 Game1.isSnowing = false;
                         }
-                            break;
+                        break;
                     case 2:
                         Game1.player.addItemToInventory(RandomItem());  //adds random item
-                        break;    
+                        break;
                     case 3:
                         Monster HA;
                         try
@@ -564,7 +540,7 @@ namespace chaosaddon
                         }
                         catch (Exception ex)  // if  the vector2 does not exist
                         {
-                           
+
                         }
                         break;
                     case 4:
@@ -579,16 +555,16 @@ namespace chaosaddon
                         break;
                     case 7:
                         int health = Game1.player.health;
-                        if (health/2 == 0)      // snaps your health in half.
+                        if (health / 2 == 0)      // snaps your health in half.
                         {
                             Game1.player.health = 1;
                         }
                         else
                         {
-                            Game1.player.health /= 2;  
+                            Game1.player.health /= 2;
                         }
                         Game1.hudMessages.Add(new HUDMessage("The fuck?"));
-                        Game1.showGlobalMessage(Game1.player.Name+" got their health snapped in half.");
+                        Game1.showGlobalMessage(Game1.player.Name + " got their health snapped in half.");
                         break;
                     case 8:
                         Game1.player.addedSpeed -= 3; //subtracts speed
@@ -600,12 +576,12 @@ namespace chaosaddon
                         }
                         else
                         {
-                            Thread Peter = new Thread(new ParameterizedThreadStart(PeterEvent));  
+                            Thread Peter = new Thread(new ParameterizedThreadStart(PeterEvent));
                             Peter.Start(); //starts a peter griffin event if not in a dungeon or mineshaft. (see PeterEvent)
 
                         }
                         break;
-
+                    
 
 
                 }
@@ -615,7 +591,7 @@ namespace chaosaddon
 
             if (e.NewTime == randomvar_events2) // late 4 pm to 8 pm, default starting time of 6 pm
             {
-                switch (new Random().Next(0, 9))
+                switch (new Random().Next(0, 10))
                 {
                     //new Random().Next(0, 9)
                     case 0:
@@ -653,10 +629,13 @@ namespace chaosaddon
                             Game1.hudMessages.Add(new HUDMessage("250 gold subtracted for some reason."));
                         }
                         break;
-                        
+                    case 9:
+                        Thread teleport = new Thread(new ParameterizedThreadStart(randomWarpEvent));
+                        teleport.Start(); //starts a teleport (see randomWarpEvent)
+                        break;
 
 
-                  
+
 
 
                 }
@@ -665,28 +644,98 @@ namespace chaosaddon
 
             //EXP
 
-            
+
         }
 
-        // NEW METHODS
 
-        public static Item RandomItem()
-        {
-            string itemnum;
-            
-                itemnum = "" + new Random().Next(0, 900);
-                Item x =(Item)new StardewValley.Object(itemnum, 1, false, 10, 0);
-                if (x.Name == "Error Item")
-                {
-                    return RandomItem();
-                }
-            return x;
-            
-        }
 
-        
+
         // EVENTS
-        public static void PeterEvent (object obj)
+
+        private void randomWarpEvent(object obj)
+        {
+            
+            try
+            {
+                int loc = new Random().Next(0, 32);
+
+                //finds a valid location
+                while (loc == 15 || (loc >= 17 && loc <= 21) || (loc >= 25 && loc <= 30))
+                {
+                    loc = new Random().Next(0, 32);
+                }
+
+                GameLocation locat = Game1.locations.ElementAt(loc);
+                Vector2 vect;
+                GameLocation playerLocat = Game1.player.currentLocation;
+                Vector2 playerVect = Game1.player.Tile;
+          
+                try
+                {
+                    
+                    //Looks at the diagonal left half of the map for an empty tile.
+                    for (int y = 0; true; y++)
+                    {
+                        for (int x = 0; x<y; x++)
+                        {
+                            Vector2 buf = new Vector2(x, y);
+                            if (!locat.IsTileBlockedBy(buf))
+                            {
+                                vect = buf;
+
+                                
+                                int r = new Random().Next(0, 64);
+                                if (r==3)
+                                {
+                                    // I fucking hate using goto here as goto sucks but its better than trying to create a complex break system that works with vector2 buf, as buf cannot be null.
+                                    goto randomWarpEvent_outOfLoop;
+                                }
+                                
+                            }
+                        }
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    //keep doing it until it works, since using goto causes issues. This is pretty cursed though. I'm sorry for my crimes.
+                    
+                    if (GC.GetTotalMemory(false)> 1073741824)
+                    {
+                        //This doesnt really need to be here, but just in case you are SUPER unlucky and this loop goes on for far too long, no crash will happen.
+                        // In reality, if this executes there is something very wrong. (ie, there is more than a GB of memory that is being used?!?!) 
+                        Console.WriteLine("Chaosaddon: Random warp failed due to lack of memory (OVER 1 GB OF MEMORY USED)");
+                        return;
+                    }
+                    randomWarpEvent(obj);
+                    return;
+                }
+
+            randomWarpEvent_outOfLoop:
+                Game1.warpFarmer(locat.Name, (int)vect.X, (int)vect.Y, false);
+                Thread.Sleep(15000);
+
+                //if the integer cast made the current tile blocked
+                if (playerLocat.IsTileBlockedBy(new Vector2((int)playerVect.X, (int)playerVect.Y)))
+                {
+
+                    Game1.warpHome();
+                }
+                else
+                {
+                    Game1.warpFarmer(playerLocat.Name, (int)playerVect.X, (int)playerVect.Y, false);
+                }
+
+
+
+
+            }
+            catch(Exception e)
+            {
+
+            }
+        }
+        public static void PeterEvent(object obj)
         {
             Game1.player.jump();
             Game1.player.canMove = false;
@@ -701,14 +750,14 @@ namespace chaosaddon
             Game1.timeOfDay += 200;
         }
 
-        public void MiscEvents (object obj)
+        public void MiscEvents(object obj)
         {
             while (true)
             {
 
-                
 
-                
+
+
                 try
                 {
                     // EXP
@@ -722,23 +771,25 @@ namespace chaosaddon
                             GainExpHoe = false;
                         }
 
-                    
-                    
+
+
                 }
                 catch (NullReferenceException e)
                 {
                     break;
                 }
 
-               
+
             }
         }
+
+
 
         //CURSES
 
         public void SuperSpeedCurse(object obj)
         {
-            
+
             while (CurseActive)
             {
                 try
@@ -750,7 +801,7 @@ namespace chaosaddon
                     break;
                 }
             }
-            
+
         }
 
         public void JumpCurse(object obj)
@@ -779,7 +830,7 @@ namespace chaosaddon
             }
             catch (NullReferenceException e)
             {
-               
+
             }
         }
         public void BlueCurse(object obj)
@@ -797,9 +848,9 @@ namespace chaosaddon
 
                 while (CurseActive)
                 {
-                    
+
                     Thread.Sleep(100);
-                    
+
                 }
                 ///reverting data
                 Game1.player.changeSkinColor(SkinOG);
@@ -814,7 +865,8 @@ namespace chaosaddon
 
         public void SeasonalCurse(object obj)  /// 
         {
-            try {
+            try
+            {
                 if (Game1.season == Season.Spring)
                 {
                     while (CurseActive)
@@ -870,14 +922,14 @@ namespace chaosaddon
         //SPECIAL BUFFS
         static public void BuffMethod(string key)
         {
-            
-            switch(key)
+
+            switch (key)
             {
-                
+
             }
         }
 
-       
+
 
 
 
@@ -886,13 +938,13 @@ namespace chaosaddon
         {
             string track = "";
             bool running = false;
-            Action<object> wait = (j) => 
+            Action<object> wait = (j) =>
             {
                 string t = track;
-                Game1.showRedMessage("Great!",false);
-                for(int tim = 0; tim< 50; tim++)
+                Game1.showRedMessage("Great!", false);
+                for (int tim = 0; tim < 50; tim++)
                 {
-                    if(t != track)
+                    if (t != track)
                     {
                         break;
                     }
@@ -907,7 +959,7 @@ namespace chaosaddon
             buffDataMusic.LuckLevel = 3;
 
             buffEffectsMusic = new BuffEffects(buffDataMusic);
-            
+
             int val = 0;
             while (true)
             {
@@ -918,36 +970,36 @@ namespace chaosaddon
                     while (Game1.getMusicTrackName() != null && BPM.TryGetValue(Game1.getMusicTrackName(), out val) && Game1.player != null && track == Game1.getMusicTrackName())
                     {
                         val /= 2;
-                        for(int tim = 0; tim< val-75; tim++)
+                        for (int tim = 0; tim < val - 75; tim++)
                         {
                             Thread.Sleep(1);
-                            if(Game1.getMusicTrackName() != track)
+                            if (Game1.getMusicTrackName() != track)
                             {
                                 break;
                             }
-                            
+
                         }
-                        if(Game1.getMusicTrackName() == track)
+                        if (Game1.getMusicTrackName() == track)
                         {
-                            
+
                             musicAttack = new Buff("1337", "none", "none", 150, null, 20, buffEffectsMusic, false, "MusicBuff", "Only active now");
                             Game1.player.applyBuff(musicAttack);
                             MusicAttackIsRunning = true;
-                            
 
-                            for (int tim = 0; tim< 150; tim++)
+
+                            for (int tim = 0; tim < 150; tim++)
                             {
 
 
-                                
-                                
+
+
                                 if (Game1.getMusicTrackName() != track)
                                 {
                                     break;
                                 }
-                                if(Helper.Input.IsDown(SButton.MouseLeft) && running == false)
+                                if (Helper.Input.IsDown(SButton.MouseLeft) && running == false)
                                 {
-                                    
+
                                     running = true;
                                     new Thread(new ParameterizedThreadStart(wait)).Start();
                                 }
@@ -958,12 +1010,12 @@ namespace chaosaddon
 
                         }
 
-                        
+
                     }
                 }
                 catch (Exception e)
                 {
-                    while(!(Game1.getMusicTrackName() != null && BPM.TryGetValue(Game1.getMusicTrackName(), out val) && Game1.player != null))
+                    while (!(Game1.getMusicTrackName() != null && BPM.TryGetValue(Game1.getMusicTrackName(), out val) && Game1.player != null))
                     {
                         Thread.Sleep(1);
                         //Console.WriteLine("fail");
@@ -974,18 +1026,36 @@ namespace chaosaddon
 
                     }
                 }
-                
+
             }
         }
 
+        // NEW METHODS
+
+        public static Item RandomItem()
+        {
+            string itemnum;
+
+            itemnum = "" + new Random().Next(0, 900);
+            Item x = (Item)new StardewValley.Object(itemnum, 1, false, 10, 0);
+            if (x.Name == "Error Item")
+            {
+                return RandomItem();
+            }
+            return x;
+
+        }
         private bool wait(int time)
         {
             Thread.Sleep(time);
             return true;
         }
+
+
+
         
 
-
+        
         // NEW CHANGES
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
         {
@@ -994,12 +1064,12 @@ namespace chaosaddon
             Misc.Start();
             Music = new Thread(new ParameterizedThreadStart(OSTBPM));
             Music.Start();
-           //data
+            //data
 
             BPMData.initalize();
             BPM = BPMData.getData();
 
-            
+
 
 
 
@@ -1023,7 +1093,7 @@ namespace chaosaddon
             /// BEER SEEDS
             /// Beer SEEDS CROPDATA
 
-            Beer.Seasons = new List<Season> { Season.Spring,Season.Fall };
+            Beer.Seasons = new List<Season> { Season.Spring, Season.Fall };
 
             Beer.DaysInPhase = new List<int> { 0, 0, 0, 0 };
             Beer.RegrowDays = -1;
@@ -1103,7 +1173,7 @@ namespace chaosaddon
             Beershop.ModData = null;
             Beershop.PerItemCondition = null;
 
-            /*
+
             ///Cat bulb
             ///
             ///CATBULB OBJ
@@ -1294,51 +1364,51 @@ namespace chaosaddon
             Bombshop.ModData = null;
             Bombshop.PerItemCondition = null;
 
-            
-            */
 
 
 
 
 
 
-            
-            
-           
 
-            
+
+
+
+
+
+
         }
 
 
-        
 
-        
 
-        
+
+
+
         ///////////HARMONY PATCHING//////////////
 
         ///coding c# use, remember to comment out
         //StardewValley.Tools.Slingshot
         //public virtual int GetAmmoDamage(Object ammunition)
-       // {
-         //   return ammunition?.QualifiedItemId switch
+        // {
+        //   return ammunition?.QualifiedItemId switch
         //    {
-          //      "(O)388" => 2,
-           //     "(O)390" => 5,
-          //      "(O)378" => 10,
-          //      "(O)380" => 20,
-         //       "(O)384" => 30,
-         //       "(O)382" => 15,
-         //       "(O)386" => 50,
-         //       "(O)441" => 20,
+        //      "(O)388" => 2,
+        //     "(O)390" => 5,
+        //      "(O)378" => 10,
+        //      "(O)380" => 20,
+        //       "(O)384" => 30,
+        //       "(O)382" => 15,
+        //       "(O)386" => 50,
+        //       "(O)441" => 20,
         //        _ => 1,
         //    };
         ///}
-        
-        
+
+
 
         ///Slingshot for CATBULB
-        /*
+
         public static bool GetAmmoDamage_Prefix(StardewValley.Object ammunition, ref int __result)
         {
             try
@@ -1359,7 +1429,7 @@ namespace chaosaddon
                 return true;
             }
         }
-        */
+
         /// Special buffs
         public static void GeteatObject(StardewValley.Object o, bool overrideFullness = false)
         {
@@ -1370,9 +1440,105 @@ namespace chaosaddon
             catch (Exception e)
             {
                 Console.WriteLine("Chaosaddon: Ah fuck. Something in the Harmony patch \"GeteatObject\" went wrong.");
-                
+
             }
         }
+
+        
+
+        // REFRENCE
+
+        /*
+         Farm0
+FarmHouse1
+FarmCave2
+Town3
+JoshHouse4
+HaleyHouse5
+SamHouse6
+Blacksmith7
+ManorHouse8
+SeedShop9
+Saloon10
+Trailer11
+Hospital12
+HarveyRoom13
+Beach14
+BeachNightMarket15
+ElliottHouse16
+Mountain17
+ScienceHouse18
+SebastianRoom19
+Tent20
+Forest21
+WizardHouse22
+AnimalShop23
+LeahHouse24
+BusStop25
+Mine26
+Sewer27
+BugLand28
+Desert29
+Club30
+SandyHouse31
+ArchaeologyHouse32
+WizardHouseBasement33
+AdventureGuild34
+Woods35
+Railroad36
+WitchSwamp37
+WitchHut38
+WitchWarpCave39
+Summit40
+FishShop41
+BathHouse_Entry42
+BathHouse_MensLocker43
+BathHouse_WomensLocker44
+BathHouse_Pool45
+CommunityCenter46
+JojaMart47
+Greenhouse48
+SkullCave49
+Backwoods50
+Tunnel51
+Trailer_Big52
+Cellar53
+MermaidHouse54
+Submarine55
+AbandonedJojaMart56
+MovieTheater57
+Sunroom58
+BoatTunnel59
+IslandSouth60
+IslandSouthEast61
+IslandSouthEastCave62
+IslandEast63
+IslandWest64
+IslandNorth65
+IslandHut66
+IslandWestCave167
+IslandNorthCave168
+IslandFieldOffice69
+IslandFarmHouse70
+CaptainRoom71
+IslandShrine72
+IslandFarmCave73
+Caldera74
+LeoTreeHouse75
+QiNutRoom76
+MasteryCave77
+DesertFestival78
+LewisBasement79
+Cellar2 80
+Cellar3 81
+Cellar4 82
+Cellar5 83
+Cellar6 84
+Cellar7 85
+Cellar8 86
+        */
+
+
 
         // transpliers. (sigh)
         /*
@@ -1390,7 +1556,7 @@ namespace chaosaddon
 
             
 
-            /*
+
             matcher.MatchStartForward(
                 new CodeMatch(OpCodes.Ldarg_0),
                 new CodeMatch(OpCodes.Ldfld, getAppliedID),
@@ -1416,8 +1582,8 @@ namespace chaosaddon
             return matcher.InstructionEnumeration();
         }
 
-        
-    */
+        */
+
 
 
 
@@ -1433,23 +1599,9 @@ namespace chaosaddon
 
 
 
-   
+
 
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        
