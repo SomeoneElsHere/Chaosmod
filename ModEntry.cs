@@ -1,51 +1,25 @@
 ﻿using StardewValley;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using StardewModdingAPI.Utilities;
 using StardewValley.GameData.Objects;
 using StardewValley.GameData.Crops;
-using StardewValley.GameData.Tools;
-using StardewModdingAPI.Framework.ModLoading.Rewriters.StardewValley_1_6;
 using StardewValley.Locations;
 using StardewValley.GameData.Shops;
-using StardewValley.GameData.Weapons;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Netcode;
-using StardewValley.ItemTypeDefinitions;
-using StardewValley.Projectiles;
-using System.Xml.Serialization;
 using HarmonyLib;
 using StardewValley.Tools;
-using StardewValley.GameData.SpecialOrders;
-using System.Runtime.CompilerServices;
 using StardewValley.Monsters;
 using Microsoft.Xna.Framework.Audio;
-using StardewValley.Network;
-using StardewValley.Menus;
-using System.Linq.Expressions;
-using System.Timers;
-using xTile.Tiles;
-using StardewValley.Inventories;
-using StardewValley.GameData.BigCraftables;
-using Microsoft.Xna.Framework.Media;
-using StardewValley.GameData;
-using StardewValley.GameData.Locations;
 using StardewValley.Buffs;
 using StardewValley.GameData.Buffs;
-using System.Reflection.Emit;
-using System.Reflection;
-using StardewValley.Minigames;
+using System.Security.Cryptography;
+using Microsoft.Xna.Framework.Graphics;
+using System.Diagnostics;
+
 
 
 // TO-ADD LIST
+
 
 
 
@@ -136,12 +110,12 @@ namespace chaosaddon
 
             var harmony = new Harmony(this.ModManifest.UniqueID);
             //Harmony.DEBUG = true;
-
+            //*
             harmony.Patch(
             original: AccessTools.Method(typeof(Slingshot), nameof(Slingshot.GetAmmoDamage)),
             prefix: new HarmonyMethod(typeof(ModEntry), nameof(GetAmmoDamage_Prefix))
             );
-
+            //*/
             harmony.Patch(
             original: AccessTools.Method(typeof(Farmer), nameof(Farmer.eatObject)),
             prefix: new HarmonyMethod(typeof(ModEntry), nameof(GeteatObject))
@@ -258,10 +232,12 @@ namespace chaosaddon
                     /// custom
 
                     data.Add("BEERSEEDS", Beerseeds);
+                    ///*
                     data.Add("CATBULB", CATBULB);
                     data.Add("CATBULBSEEDS", CATBULBSEEDS);
 
                     data.Add("BOMBSEEDS", Bombseeds);
+                    //*/
                     /// REFRENCE ///
                     ///foreach ((string itemID, ObjectData itemData) in data)
                     ///{
@@ -344,6 +320,8 @@ namespace chaosaddon
         /// START OF DAY CHANGES 
         private void OnDayStarted(object? sender, DayStartedEventArgs e)
         {
+            //Thread teleport = new Thread(new ParameterizedThreadStart(randomWarpEvent));
+            //teleport.Start(); //starts a teleport (see randomWarpEvent)
             //debug
             SoundBank soundBank = this.Helper.Reflection.GetField<SoundBank>(Game1.soundBank, "soundBank").GetValue();
             IEnumerable<CueDefinition> cues = this.Helper.Reflection.GetField<Dictionary<string, CueDefinition>>(soundBank, "_cues").GetValue().Values;
@@ -512,11 +490,11 @@ namespace chaosaddon
 
 
 
-        /// Chaos random-chance events
+           /// Chaos random-chance events
         private async void OnTimeChanged(object? sender, TimeChangedEventArgs e)
         {
 
-
+            
             //debug 
             //Game1.showGlobalMessage(""+ VolcanoDungeon.IsGeneratedLevel(Game1.player.currentLocation.Name, out int extrainfo2));
             //Game1.showGlobalMessage("" + Game1.player.experiencePoints[0]);
@@ -605,7 +583,7 @@ namespace chaosaddon
 
                         }
                         break;
-
+                    
 
 
                 }
@@ -615,7 +593,7 @@ namespace chaosaddon
 
             if (e.NewTime == randomvar_events2) // late 4 pm to 8 pm, default starting time of 6 pm
             {
-                switch (new Random().Next(0, 9))
+                switch (new Random().Next(0, 10))
                 {
                     //new Random().Next(0, 9)
                     case 0:
@@ -653,7 +631,10 @@ namespace chaosaddon
                             Game1.hudMessages.Add(new HUDMessage("250 gold subtracted for some reason."));
                         }
                         break;
-
+                    case 9:
+                        Thread teleport = new Thread(new ParameterizedThreadStart(randomWarpEvent));
+                        teleport.Start(); //starts a teleport (see randomWarpEvent)
+                        break;
 
 
 
@@ -668,24 +649,94 @@ namespace chaosaddon
 
         }
 
-        // NEW METHODS
 
-        public static Item RandomItem()
-        {
-            string itemnum;
-
-            itemnum = "" + new Random().Next(0, 900);
-            Item x = (Item)new StardewValley.Object(itemnum, 1, false, 10, 0);
-            if (x.Name == "Error Item")
-            {
-                return RandomItem();
-            }
-            return x;
-
-        }
 
 
         // EVENTS
+
+        private void randomWarpEvent(object obj)
+        {
+            
+            try
+            {
+                int loc = new Random().Next(0, 32);
+
+                //finds a valid location
+                while (loc == 15 || (loc >= 17 && loc <= 21) || (loc >= 25 && loc <= 30))
+                {
+                    loc = new Random().Next(0, 32);
+                }
+
+                GameLocation locat = Game1.locations.ElementAt(loc);
+                Vector2 vect;
+                GameLocation playerLocat = Game1.player.currentLocation;
+                Vector2 playerVect = Game1.player.Tile;
+          
+                try
+                {
+                    
+                    //Looks at the diagonal left half of the map for an empty tile.
+                    for (int y = 0; true; y++)
+                    {
+                        for (int x = 0; x<y; x++)
+                        {
+                            Vector2 buf = new Vector2(x, y);
+                            if (!locat.IsTileBlockedBy(buf))
+                            {
+                                vect = buf;
+
+                                
+                                int r = new Random().Next(0, 64);
+                                if (r==3)
+                                {
+                                    // I fucking hate using goto here as goto sucks but its better than trying to create a complex break system that works with vector2 buf, as buf cannot be null.
+                                    goto randomWarpEvent_outOfLoop;
+                                }
+                                
+                            }
+                        }
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    //keep doing it until it works, since using goto causes issues. This is pretty cursed though. I'm sorry for my crimes.
+                    
+                    if (GC.GetTotalMemory(false)> 1073741824)
+                    {
+                        //This doesnt really need to be here, but just in case you are SUPER unlucky and this loop goes on for far too long, no crash will happen.
+                        // In reality, if this executes there is something very wrong. (ie, there is more than a GB of memory that is being used?!?!) 
+                        Console.WriteLine("Chaosaddon: Random warp failed due to lack of memory (OVER 1 GB OF MEMORY USED)");
+                        return;
+                    }
+                    randomWarpEvent(obj);
+                    return;
+                }
+
+            randomWarpEvent_outOfLoop:
+                Game1.warpFarmer(locat.Name, (int)vect.X, (int)vect.Y, false);
+                Thread.Sleep(15000);
+
+                //if the integer cast made the current tile blocked
+                if (playerLocat.IsTileBlockedBy(new Vector2((int)playerVect.X, (int)playerVect.Y)))
+                {
+
+                    Game1.warpHome();
+                }
+                else
+                {
+                    Game1.warpFarmer(playerLocat.Name, (int)playerVect.X, (int)playerVect.Y, false);
+                }
+
+
+
+
+            }
+            catch(Exception e)
+            {
+
+            }
+        }
         public static void PeterEvent(object obj)
         {
             Game1.player.jump();
@@ -733,6 +784,8 @@ namespace chaosaddon
 
             }
         }
+
+
 
         //CURSES
 
@@ -979,6 +1032,21 @@ namespace chaosaddon
             }
         }
 
+        // NEW METHODS
+
+        public static Item RandomItem()
+        {
+            string itemnum;
+
+            itemnum = "" + new Random().Next(0, 900);
+            Item x = (Item)new StardewValley.Object(itemnum, 1, false, 10, 0);
+            if (x.Name == "Error Item")
+            {
+                return RandomItem();
+            }
+            return x;
+
+        }
         private bool wait(int time)
         {
             Thread.Sleep(time);
@@ -987,6 +1055,9 @@ namespace chaosaddon
 
 
 
+        
+
+        
         // NEW CHANGES
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
         {
@@ -1104,7 +1175,7 @@ namespace chaosaddon
             Beershop.ModData = null;
             Beershop.PerItemCondition = null;
 
-
+            ///*
             ///Cat bulb
             ///
             ///CATBULB OBJ
@@ -1294,7 +1365,7 @@ namespace chaosaddon
             Bombshop.QualityModifierMode = StardewValley.GameData.QuantityModifier.QuantityModifierMode.Stack;
             Bombshop.ModData = null;
             Bombshop.PerItemCondition = null;
-
+            //*/
 
 
 
@@ -1339,7 +1410,7 @@ namespace chaosaddon
 
 
         ///Slingshot for CATBULB
-
+        ///*
         public static bool GetAmmoDamage_Prefix(StardewValley.Object ammunition, ref int __result)
         {
             try
@@ -1360,7 +1431,7 @@ namespace chaosaddon
                 return true;
             }
         }
-
+        //*/
         /// Special buffs
         public static void GeteatObject(StardewValley.Object o, bool overrideFullness = false)
         {
@@ -1374,6 +1445,102 @@ namespace chaosaddon
 
             }
         }
+
+        
+
+        // REFRENCE
+
+        /*
+         Farm0
+FarmHouse1
+FarmCave2
+Town3
+JoshHouse4
+HaleyHouse5
+SamHouse6
+Blacksmith7
+ManorHouse8
+SeedShop9
+Saloon10
+Trailer11
+Hospital12
+HarveyRoom13
+Beach14
+BeachNightMarket15
+ElliottHouse16
+Mountain17
+ScienceHouse18
+SebastianRoom19
+Tent20
+Forest21
+WizardHouse22
+AnimalShop23
+LeahHouse24
+BusStop25
+Mine26
+Sewer27
+BugLand28
+Desert29
+Club30
+SandyHouse31
+ArchaeologyHouse32
+WizardHouseBasement33
+AdventureGuild34
+Woods35
+Railroad36
+WitchSwamp37
+WitchHut38
+WitchWarpCave39
+Summit40
+FishShop41
+BathHouse_Entry42
+BathHouse_MensLocker43
+BathHouse_WomensLocker44
+BathHouse_Pool45
+CommunityCenter46
+JojaMart47
+Greenhouse48
+SkullCave49
+Backwoods50
+Tunnel51
+Trailer_Big52
+Cellar53
+MermaidHouse54
+Submarine55
+AbandonedJojaMart56
+MovieTheater57
+Sunroom58
+BoatTunnel59
+IslandSouth60
+IslandSouthEast61
+IslandSouthEastCave62
+IslandEast63
+IslandWest64
+IslandNorth65
+IslandHut66
+IslandWestCave167
+IslandNorthCave168
+IslandFieldOffice69
+IslandFarmHouse70
+CaptainRoom71
+IslandShrine72
+IslandFarmCave73
+Caldera74
+LeoTreeHouse75
+QiNutRoom76
+MasteryCave77
+DesertFestival78
+LewisBasement79
+Cellar2 80
+Cellar3 81
+Cellar4 82
+Cellar5 83
+Cellar6 84
+Cellar7 85
+Cellar8 86
+        */
+
+
 
         // transpliers. (sigh)
         /*
@@ -1437,3 +1604,6 @@ namespace chaosaddon
 
 
 }
+
+
+        
