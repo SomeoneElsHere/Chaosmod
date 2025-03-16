@@ -1,0 +1,15 @@
+﻿{
+    "Format": "2.5.0",
+    "Changes": [
+        {
+            "Action": "Load",
+            "Target": "Tilesheets/crops",
+            "FromFile": "XNB files/Tilesheets/crops.xnb"
+        },
+        {
+            "Action": "Load",
+            "Target": "Maps/springobjects",
+            "FromFile": "XNB files/Maps/springobjects.xnb"
+        }
+    ]
+}

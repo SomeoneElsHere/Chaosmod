@@ -6,5 +6,5 @@
     "UniqueID":"SomeoneEls.chaosaddon",
     "EntryDll":"chaosaddon.dll",
     "MinimumApiVersion":"3.0.0",
-    "UpdateKeys":[]
+    "UpdateKeys": [ "GitHub:SomeoneElsHere/Chaosmod" ]
 }

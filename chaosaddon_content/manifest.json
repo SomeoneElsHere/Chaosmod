@@ -1,0 +1,11 @@
+﻿{
+    "Name": "chaosaddon_content",
+    "Author": "SomeoneEls",
+    "Version": "1.0.0",
+    "Description": "The content to the Chaosaddon mod.",
+    "UniqueID": "SomeoneEls.chaosaddon_content",
+    "UpdateKeys": [],
+    "ContentPackFor": {
+        "UniqueID": "Pathoschild.ContentPatcher"
+    }
+}

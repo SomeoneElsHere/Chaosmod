@@ -314,6 +314,49 @@ namespace chaosaddon
                 });
             }
 
+            /// DATA MAIL
+            /// 
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/mail"))
+            {
+                e.Edit(asset =>
+                {
+                    var data = asset.AsDictionary<string, string>().Data;
+                    //who needs content packs when you can just do in it in c# /hj
+
+                    string fourthwall = Environment.UserName;
+
+                    data["Robin"] = "Heya. ^ Its been a while, right? ^ Anyways, here's some wood. Don't mind the description. ^ -Robin %item id (O)709 50 %%[#]Wood from your house.";
+                    data["Demetrius"] = "Hello there, @. ^ I forgot what this was, it was back inside my house somewhere, and I decided I didn't need it anymore. ^ I Hope you find it useful. ^-Demetrius%item id (O)346 1 %%[#] Some stuff Demetrius found.";
+                    data["afterSamShow"] = "TELL ME THE FICTION, ILL SIT BACK AND LISTEN ^ THIS TIME WILL BE DIFFERENT ^ THE B-B-BULLSHIT ^ THE ENDLESS COMMITMENT ^ (...It keeps going. Wow.) ^ -Sam[#]Seems someone is a Q-bomb fan. ";
+
+
+                    data.Add("Chaosmod_custom1", "Seems like it's been a while since you have been on the farm. ^ Maybe you have seen how time works in these parts, it can be crazy sometimes, right? ^^ Anyways, good luck in your endeavors.  -???[#]???");
+                    data.Add("Chaosmod_custom2", "Wow! You seem to like this place? That or, you might hate it. ^ Oh well. These letters are not as much as a letter to you sometimes as it is a writing prompt. ^^ It's been a while since ive seen a person so involved in what I make... Maybe as a made up challenge, sure, but it still means a lot to me. ^ Welp, this has gone on for long enough. Good luck! -???[#]???");
+                    data.Add("Chaosmod_custom3", "This whole project of mine was originally why I started on my coding journey on the first place...^ although I don't really see it as something I directly play a lot. ^ There was a lot more that I have made and wanted to add, but I just can't for various reasons. ^^ Despite this, ill create new content when I can. ^ I might get in trouble for saying this, but thank you, " + fourthwall + ". -SomeoneEls[#]SomeoneEls");
+
+                });
+            }
+
+            if (e.NameWithoutLocale.IsEquivalentTo("Data"))
+            {
+                e.Edit(asset =>
+                {
+                    var data = asset.AsDictionary<string, string>().Data;
+                    //who needs content packs when you can just do in it in c# /hj
+
+                    string fourthwall = Environment.UserName;
+
+                    data["Robin"] = "Heya. ^ Its been a while, right? ^ Anyways, here's some wood. Don't mind the description. ^ -Robin %item id (O)709 50 %%[#]Wood from your house.";
+                    data["Demetrius"] = "Hello there, @. ^ I forgot what this was, it was back inside my house somewhere, and I decided I didn't need it anymore. ^ I Hope you find it useful. ^-Demetrius%item id (O)346 1 %%[#] Some stuff Demetrius found.";
+                    data["afterSamShow"] = "TELL ME THE FICTION, ILL SIT BACK AND LISTEN ^ THIS TIME WILL BE DIFFERENT ^ THE B-B-BULLSHIT ^ THE ENDLESS COMMITMENT ^ (...It keeps going. Wow.) ^ -Sam[#]Seems someone is a Q-bomb fan. ";
+
+
+                    data.Add("Chaosmod_custom1", "Seems like it's been a while since you have been on the farm. ^ Maybe you have seen how time works in these parts, it can be crazy sometimes, right? ^^ Anyways, good luck in your endeavors.  ^ -???[#]???");
+                    data.Add("Chaosmod_custom2", "Wow! You seem to like this place? That or, you might hate it. ^ Oh well. These letters are not as much as a letter to you sometimes as it is a writing prompt. ^^ It's been a while since ive seen a person so involved in what I make... Maybe as a made up challenge, sure, but it still means a lot to me. ^ Welp, this has gone on for long enough. Good luck! ^ -???[#]???");
+                    data.Add("Chaosmod_custom3", "This whole project of mine was originally why I started on my coding journey on the first place...^ although I don't really see it as something I directly play a lot. ^ There was a lot more that I have made and wanted to add, but I just can't for various reasons. ^^ Despite this, i'll create new content when I can. ^ I might get in trouble for saying this, but thank you, " + fourthwall + ". ^ -SomeoneEls[#]SomeoneEls");
+
+                });
+            }
 
         }
 
@@ -333,15 +376,30 @@ namespace chaosaddon
 
 
 
-
-            ///position change Game1.player.Position = new Vector2(800, 600);
+            //DAY SPECIFIC
+             
+            ///adds bombs for 10 days
             if (Game1.season == Season.Spring && Game1.year == 1 && Game1.dayOfMonth <= 10)
             {
                 Game1.player.addItemToInventory((Item)new StardewValley.Object("288", 1, false, 10, 0));
             }
 
-            ///Game1.showGlobalMessage();
-            ///
+
+            ///MAIL
+            if (Game1.season == Season.Spring && Game1.year == 1 && Game1.dayOfMonth == 11)
+            {
+                Game1.addMail("Chaosmod_custom1");
+            }
+            if (Game1.season == Season.Spring && Game1.year == 2 && Game1.dayOfMonth == 1)
+            {
+                Game1.addMail("Chaosmod_custom2");
+            }
+            if (Game1.season == Season.Spring && Game1.year == 3 && Game1.dayOfMonth == 1)
+            {
+                Game1.addMail("Chaosmod_custom3");
+            }
+
+
 
 
 
@@ -656,7 +714,10 @@ namespace chaosaddon
 
         private void randomWarpEvent(object obj)
         {
-            
+            while(Game1.player.IsBusyDoingSomething())
+            {
+
+            }
             try
             {
                 int loc = new Random().Next(0, 32);
@@ -676,9 +737,9 @@ namespace chaosaddon
                 {
                     
                     //Looks at the diagonal left half of the map for an empty tile.
-                    for (int y = 0; true; y++)
+                    for (int y = 1; true; y++)
                     {
-                        for (int x = 0; x<y; x++)
+                        for (int x = 1; x<y; x++)
                         {
                             Vector2 buf = new Vector2(x, y);
                             if (!locat.IsTileBlockedBy(buf))
