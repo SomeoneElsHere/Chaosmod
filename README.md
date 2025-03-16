@@ -1,5 +1,6 @@
 Hello! This is an addon to another mod that I can't publish because of copyright reasons and size. 
-This mod is for Stardew Valley! It is mostly a joke mod. Use the Chaosaddon folder inside as the mod.
+This mod is for Stardew Valley! It is mostly a joke mod. Use the chaosaddon folder inside as the mod addon and the 
+chaosaddon_content as the content pack.
 
 This will add...
 
