@@ -1215,7 +1215,7 @@ namespace chaosaddon
                 }
                 foreach (var data2 in data.Value.FriendsAndFamily)
                 {
-                    Console.WriteLine(data2.Value);
+                    
                     if (data2.Value == "[LocalizedText Strings\\Characters:Relative_Husband]" || data2.Value == "[LocalizedText Strings\\Characters:Relative_Wife]")
                     {
                         can = false;
