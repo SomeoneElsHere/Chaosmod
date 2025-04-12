@@ -15,7 +15,13 @@ using StardewValley.GameData.Buffs;
 using System.Security.Cryptography;
 using Microsoft.Xna.Framework.Graphics;
 using System.Diagnostics;
-
+using xTile.Dimensions;
+using StardewValley.GameData.Characters;
+using System.Reflection.Emit;
+using System.Reflection;
+using StardewValley.Minigames;
+using Microsoft.VisualBasic;
+using StardewValley.Characters;
 
 
 // TO-ADD LIST
@@ -95,10 +101,14 @@ namespace chaosaddon
         ObjectData CATBULB = new ObjectData();
         ShopItemData CATBULBSEEDSHOP = new ShopItemData();
 
+        //love interests
+
+        Dictionary<string,bool> canRomance = new Dictionary<string,bool>();
+
 
         public override void Entry(IModHelper helper)
         {
-
+            
 
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
             helper.Events.GameLoop.DayStarted += this.OnDayStarted;
@@ -121,12 +131,17 @@ namespace chaosaddon
             prefix: new HarmonyMethod(typeof(ModEntry), nameof(GeteatObject))
             );
 
+
             /*
             harmony.Patch(
             original: AccessTools.Method(typeof(BuffManager), nameof(BuffManager.Update)),
             transpiler: new HarmonyMethod(typeof(ModEntry), nameof(BuffUpdate_Transpiler))
             );
             */
+
+
+
+
 
 
         }
@@ -141,7 +156,30 @@ namespace chaosaddon
 
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
-            if (e.NameWithoutLocale.IsEquivalentTo("Data/Objects"))
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/NPCDispositions") && Game1.player != null && canRomance != null)
+            {
+                Console.WriteLine("hello");
+                e.Edit(asset =>
+                {
+                    var data = asset.AsDictionary<string, string>().Data;
+
+                    foreach (var data1 in data)
+                    {
+                        if (data1.Value.Contains("/datable") && !canRomance[data1.Key])
+                        {
+                            data1.Value.Replace("/datable", "/not-datable");
+                        }
+                        else if(data1.Value.Contains("/not-datable") && canRomance[data1.Key])
+                        {
+                            data1.Value.Replace("/not-datable", "/datable");
+                        }
+
+                    }
+
+                });
+            }
+
+              if (e.NameWithoutLocale.IsEquivalentTo("Data/Objects"))
             {
                 e.Edit(asset =>
                 {
@@ -202,7 +240,8 @@ namespace chaosaddon
 
 
                     /// MATERIALS
-
+                    
+                    
                     /// Stone
                     data["390"].Price = 2;
                     data["390"].Description = "Rocky.";
@@ -223,7 +262,7 @@ namespace chaosaddon
                     data["612"].Description = "Barely edible.";
 
 
-
+                   
                     /// OTHER
                     /// purple shorts
 
@@ -302,7 +341,7 @@ namespace chaosaddon
                 e.Edit(asset =>
                 {
                     var data = asset.AsDictionary<string, ShopData>().Data;
-
+                    
 
                     /// Custom 
                     ///Beerseeds 
@@ -333,7 +372,7 @@ namespace chaosaddon
                     data.Add("Chaosmod_custom1", "Seems like it's been a while since you have been on the farm. ^ Maybe you have seen how time works in these parts, it can be crazy sometimes, right? ^^ Anyways, good luck in your endeavors.  -???[#]???");
                     data.Add("Chaosmod_custom2", "Wow! You seem to like this place? That or, you might hate it. ^ Oh well. These letters are not as much as a letter to you sometimes as it is a writing prompt. ^^ It's been a while since ive seen a person so involved in what I make... Maybe as a made up challenge, sure, but it still means a lot to me. ^ Welp, this has gone on for long enough. Good luck! -???[#]???");
                     data.Add("Chaosmod_custom3", "This whole project of mine was originally why I started on my coding journey on the first place...^ although I don't really see it as something I directly play a lot. ^ There was a lot more that I have made and wanted to add, but I just can't for various reasons. ^^ Despite this, ill create new content when I can. ^ I might get in trouble for saying this, but thank you, " + fourthwall + ". -SomeoneEls[#]SomeoneEls");
-
+                    
                 });
             }
 
@@ -356,9 +395,12 @@ namespace chaosaddon
                     data.Add("Chaosmod_custom3", "This whole project of mine was originally why I started on my coding journey on the first place...^ although I don't really see it as something I directly play a lot. ^ There was a lot more that I have made and wanted to add, but I just can't for various reasons. ^^ Despite this, i'll create new content when I can. ^ I might get in trouble for saying this, but thank you, " + fourthwall + ". ^ -SomeoneEls[#]SomeoneEls");
 
                 });
+                
             }
 
         }
+
+        
 
         /// START OF DAY CHANGES 
         private void OnDayStarted(object? sender, DayStartedEventArgs e)
@@ -371,13 +413,31 @@ namespace chaosaddon
 
 
 
+
+
+
+            //romances
+            int seed = 0;
+            for (int i = 0; i < Game1.player.Name.Length; i++)
+            {
+                seed += Game1.player.Name[i];
+
+            }
+            doRomance(seed);
+
+            
+
+
+
+
+
             //Game1.player.addItemToInventory((Item)new StardewValley.Object("288", 1, false, 10, 0));
             /// Misc threads
 
 
 
             //DAY SPECIFIC
-             
+
             ///adds bombs for 10 days
             if (Game1.season == Season.Spring && Game1.year == 1 && Game1.dayOfMonth <= 10)
             {
@@ -531,7 +591,7 @@ namespace chaosaddon
         /// CONSTANT CHANGES
         private void OnUpdateTicked(object? sender, UpdateTickedEventArgs e)
         {
-
+          
         }
 
         /// EXP
@@ -554,8 +614,7 @@ namespace chaosaddon
 
             
             //debug 
-            //Game1.showGlobalMessage(""+ VolcanoDungeon.IsGeneratedLevel(Game1.player.currentLocation.Name, out int extrainfo2));
-            //Game1.showGlobalMessage("" + Game1.player.experiencePoints[0]);
+            
 
             if (e.NewTime == randomvar_events1) //Early 10 am to 2 pm, default starting time of 12 pm
             {
@@ -1115,10 +1174,95 @@ namespace chaosaddon
         }
 
 
+        NPC getCharacter(string npcName)
+        {
+            foreach (GameLocation loc in Game1.locations)
+            {
+                if (loc.characters.Count > 0)
+                {
 
-        
+                    foreach (NPC npc in loc.characters)
+                    {
+                        if (npc.Name == npcName)
+                        {
+                            //Game1.addHUDMessage(new HUDMessage(npc.Name + " : " + loc.Name + " at " + npc.Tile.X + "," + npc.Tile.Y));
+                            return npc;
+                            
+                        }
 
-        
+                    }
+                }
+            }
+            return null;
+        }
+
+
+        void doRomance(int seed)
+        {
+            int x = 2;
+            bool can = false;
+            bool noCanidates = true;
+
+
+            foreach (var data in Game1.characterData)
+            {
+                Netcode.NetBool t = new Netcode.NetBool(true);
+                Netcode.NetBool f = new Netcode.NetBool(false);
+                NPC n = getCharacter(data.Key);
+                if (n == null)
+                {
+                    continue;
+                }
+                foreach (var data2 in data.Value.FriendsAndFamily)
+                {
+                    Console.WriteLine(data2.Value);
+                    if (data2.Value == "[LocalizedText Strings\\Characters:Relative_Husband]" || data2.Value == "[LocalizedText Strings\\Characters:Relative_Wife]")
+                    {
+                        can = false;
+                        Assembly.GetAssembly(typeof(NPC))
+                             .GetType("StardewValley.NPC")
+                            .GetField("datable")
+                             .SetValue(n, f);
+                        goto NPCoverride; //either its a goto or ANOTHER flag. It just reads better for me using goto, and the label is pretty clear on what it does.
+                    }
+                }
+                if ((seed % x > x / 2) && (data.Value.Age == NpcAge.Adult))
+                {
+                    can = true;
+                    noCanidates = false;
+                    Assembly.GetAssembly(typeof(NPC))
+                    .GetType("StardewValley.NPC")
+                   .GetField("datable")
+                    .SetValue(n, t);
+
+                }
+                else
+                {
+
+                    can = false;
+                    Assembly.GetAssembly(typeof(NPC))
+                         .GetType("StardewValley.NPC")
+                        .GetField("datable")
+                         .SetValue(n, f);
+                }
+
+            NPCoverride:
+                data.Value.CanBeRomanced = can;
+
+                canRomance.TryAdd(data.Key, can);
+                x++;
+            }
+
+
+            if(noCanidates)
+            {
+                doRomance(++seed);
+            }
+
+
+        }
+      
+
         // NEW CHANGES
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
         {
@@ -1131,9 +1275,7 @@ namespace chaosaddon
 
             BPMData.initalize();
             BPM = BPMData.getData();
-
-
-
+            
 
 
 
@@ -1367,7 +1509,7 @@ namespace chaosaddon
             Bomb.CountForMonoculture = true;
             Bomb.CountForPolyculture = true;
             Bomb.CustomFields = null;
-
+            
             ///Bombseeds 
 
             Bombseeds.Name = "Bomb Seeds";
@@ -1468,7 +1610,7 @@ namespace chaosaddon
         //    };
         ///}
 
-
+        
 
         ///Slingshot for CATBULB
         ///*
@@ -1507,7 +1649,8 @@ namespace chaosaddon
             }
         }
 
-        
+
+
 
         // REFRENCE
 
@@ -1646,6 +1789,10 @@ Cellar8 86
         }
 
         */
+
+
+
+
 
 
 
