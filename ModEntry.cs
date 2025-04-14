@@ -373,9 +373,34 @@ namespace chaosaddon
                     data.Add("Chaosmod_custom2", "Wow! You seem to like this place? That or, you might hate it. ^ Oh well. These letters are not as much as a letter to you sometimes as it is a writing prompt. ^^ It's been a while since ive seen a person so involved in what I make... Maybe as a made up challenge, sure, but it still means a lot to me. ^ Welp, this has gone on for long enough. Good luck! -???[#]???");
                     data.Add("Chaosmod_custom3", "This whole project of mine was originally why I started on my coding journey on the first place...^ although I don't really see it as something I directly play a lot. ^ There was a lot more that I have made and wanted to add, but I just can't for various reasons. ^^ Despite this, ill create new content when I can. ^ I might get in trouble for saying this, but thank you, " + fourthwall + ". -SomeoneEls[#]SomeoneEls");
                     
+                    data.Add("WrongAddress1", "Hey. It's been a while, Yu. It's been a while since the incident way back in Inaba. ^I doubt I would ever get parole for what I did, but who cares about that yeah? ^^ Haha.. just kidding, I'm making plenty enough friends down where I am. Anyways, make sure you visit that old geezer sometime to make sure he's fine yeah? ^^ Just between me and you, I think he would want the company.");
+                    data.Add("WrongAddress2", "HEY MAN! It's Joe. ^ I know I have a lot of work nowadays with all the gangs and shit but I was wonderin if you still want that old guitar that Neko stole.  ^ It's a bit too old for me nowadays, so I bought another, ...ya want it?^ ANYWAYS. Take care of ya self man!");
+                    
+                    data.Add("FunFact1", "Fun fact: this is the first fun fact in written in the mod.");
+                    data.Add("FunFact2", "Fun fact: Im typing this on homestuck day.");
+                    data.Add("FunFact3", "Fun fact: If you look on the forms, I had a whole issue dealing with the datable varible while making this mod.");
+                    data.Add("FunFact4", "Fun fact: I should be doing an assignment rn but I don't wanna :V");
+                    data.Add("FunFact5", "Fun fact: this is a fun fact.");
+                    data.Add("FunFact6", "Fun fact: I started this mod way back in 2020.");
+                    data.Add("FunFact7", "Fun fact: I like trains");
+                    data.Add("FunFact8", "Fun fact: Transpliers in c# basically add MSIL code into your executables.");
+                    data.Add("FunFact9", "Fun fact: Ive only shared the files of the uncut verison of this mod (with the copyright issues) with 1 person. Ive shown the uncut version with a bunch of people though.");
+                    data.Add("FunFact10", "Fun fact: As of today, there are 2 goto statements in this mod. One is basically mandatory, the other one just reads better.");
+                    data.Add("FunFact11", "Fun fact: Some of the code in this mod is cursed..");
+                    data.Add("FunFact12", "Fun fact: There is a harmony prefix in this mod that allows custom side effects for buffs. It is currently unused.");
+                    data.Add("FunFact13", "Fun fact: I am a qbomb fan.");
+                    data.Add("FunFact14", "Fun fact: You can't get the peter griffin event if you are in a dungeon or mineshaft.");
+                    data.Add("FunFact15", "Fun fact: The custom events in this mod are done via multithreading.");
+                    data.Add("FunFact16", "Fun fact: You can get farming experience by using your hoe in this mod.");
+                    data.Add("FunFact17", "Fun fact?: Yesterday, I asked you-");
+                    data.Add("FunFact18", "Fun fact: Sometimes, I just look at the forms to help people with making mods (not to satiate my crippling depression).");
+                    data.Add("FunFact19", "Fun fact: Rina-chan best girl, ROBOhead best boi.");
+                    data.Add("FunFact20", "Fun fact: The random warp event fails if you have more than 1.5GB of trash in the garbage collector. If this is the case, it is probable that at least one of your mods has a memory leak.");
+
+
                 });
             }
-
+            /*
             if (e.NameWithoutLocale.IsEquivalentTo("Data"))
             {
                 e.Edit(asset =>
@@ -397,7 +422,7 @@ namespace chaosaddon
                 });
                 
             }
-
+            */
         }
 
         
@@ -459,10 +484,32 @@ namespace chaosaddon
                 Game1.addMail("Chaosmod_custom3");
             }
 
+            /// fun fact mail
+            if(Game1.dayOfMonth %10 == 0)
+            {
+                    try
+                    {
+                        int random = new Random().Next(20);
+                        random++;
+                    Game1.addMail("FunFact" + random);
+                    }
+                    catch(Exception ek)
+                    {
 
+                    }
+            }
 
-
-
+            /// Rare mail
+             int r = new Random(DateAndTime.Now.Millisecond).Next(128);
+             if(r == 1)
+             {
+                Game1.addMail("WrongAddress1");
+             }
+             if(r == 2 )
+             {
+                Game1.addMail("WrongAddress2");
+             }
+            
 
             //SLEEP CHANGES
 
@@ -627,7 +674,7 @@ namespace chaosaddon
                         break;
                     case 1:
 
-                        if (Game1.isRaining && !Game1.isDebrisWeather)
+                        if (!Game1.isRaining && !Game1.isDebrisWeather)
                         {
                             Game1.showGlobalMessage("Time to take-a Piss!");
                             if (Game1.season != StardewValley.Season.Winter)
