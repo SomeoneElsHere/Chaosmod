@@ -10,6 +10,8 @@ Curses! You can be stuck with a variety of curses, which will effect your playth
 
 New items! 
 
+Random Marriage! You will be able to marry a random set of people!
+
 New descriptions and prices for items! Yes I made a lot of things uh.. expensive.
 
 ...Plus a mechanic that increases luck and damage for clicking along the BPM...
