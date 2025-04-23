@@ -22,6 +22,7 @@ using System.Reflection;
 using StardewValley.Minigames;
 using Microsoft.VisualBasic;
 using StardewValley.Characters;
+using StardewValley.Menus;
 
 
 // TO-ADD LIST
@@ -77,7 +78,7 @@ namespace chaosaddon
 
         //items
 
-
+        
 
         //CRAFTING RECIPES
         CraftingRecipe Wood1;
@@ -218,7 +219,7 @@ namespace chaosaddon
                     data["493"].Name = "Holly Seeds";
 
 
-
+                    
 
                     ///CROP//
 
@@ -439,7 +440,7 @@ namespace chaosaddon
 
 
 
-
+            
 
             //romances
             int seed = 0;
@@ -531,7 +532,7 @@ namespace chaosaddon
             }
 
 
-
+            
 
 
             //CURSES
@@ -638,7 +639,7 @@ namespace chaosaddon
         /// CONSTANT CHANGES
         private void OnUpdateTicked(object? sender, UpdateTickedEventArgs e)
         {
-          
+            
         }
 
         /// EXP
@@ -655,13 +656,40 @@ namespace chaosaddon
 
 
 
-           /// Chaos random-chance events
+          
         private async void OnTimeChanged(object? sender, TimeChangedEventArgs e)
         {
 
-            
+
             //debug 
-            
+
+
+            //fixing it so you can shop at clints even if you are married to him.
+
+            if(Game1.timeOfDay == 900 && Game1.player.getSpouse() != null && Game1.player.getSpouse().Name == "Clint")
+            {
+                Game1.warpCharacter(Game1.getCharacterFromName("Clint"), "Blacksmith", new Vector2(3, 13));
+            }
+            else if(Game1.timeOfDay == 1600 && Game1.player.getSpouse() != null && Game1.player.getSpouse().Name == "Clint")
+            {
+
+                Game1.warpCharacter(Game1.getCharacterFromName("Clint"), Game1.locations[0], new Vector2(34, 5));
+            }
+
+            //Same for willy
+
+            if (Game1.timeOfDay == 900 && Game1.player.getSpouse() != null && Game1.player.getSpouse().Name == "Willy")
+            {
+                Game1.warpCharacter(Game1.getCharacterFromName("Willy"), "FishShop", new Vector2(5, 4));
+            }
+            else if (Game1.timeOfDay == 1600 && Game1.player.getSpouse() != null && Game1.player.getSpouse().Name == "Willy")
+            {
+                Game1.warpCharacter(Game1.getCharacterFromName("Willy"), Game1.locations[0], new Vector2(34, 5));
+            }
+
+
+
+            ///Random events
 
             if (e.NewTime == randomvar_events1) //Early 10 am to 2 pm, default starting time of 12 pm
             {
@@ -1128,7 +1156,7 @@ namespace chaosaddon
             buffDataMusic.LuckLevel = 3;
 
             buffEffectsMusic = new BuffEffects(buffDataMusic);
-
+            
             int val = 0;
             while (true)
             {
@@ -1221,7 +1249,7 @@ namespace chaosaddon
         }
 
 
-        NPC getCharacter(string npcName)
+        NPC getCharacterLocation(string npcName)
         {
             foreach (GameLocation loc in Game1.locations)
             {
@@ -1232,7 +1260,7 @@ namespace chaosaddon
                     {
                         if (npc.Name == npcName)
                         {
-                            //Game1.addHUDMessage(new HUDMessage(npc.Name + " : " + loc.Name + " at " + npc.Tile.X + "," + npc.Tile.Y));
+                            Game1.addHUDMessage(new HUDMessage(npc.Name + " : " + loc.Name + " at " + npc.Tile.X + "," + npc.Tile.Y));
                             return npc;
                             
                         }
@@ -1255,12 +1283,12 @@ namespace chaosaddon
             {
                 Netcode.NetBool t = new Netcode.NetBool(true);
                 Netcode.NetBool f = new Netcode.NetBool(false);
-                NPC n = getCharacter(data.Key);
+                NPC n = Game1.getCharacterFromName(data.Key);
                 if (n == null)
                 {
-                    continue;
+                    continue; //if that charcter doesnt exist
                 }
-                foreach (var data2 in data.Value.FriendsAndFamily)
+                foreach (var data2 in data.Value.FriendsAndFamily) //Remove any married ppl from the pool
                 {
                     
                     if (data2.Value == "[LocalizedText Strings\\Characters:Relative_Husband]" || data2.Value == "[LocalizedText Strings\\Characters:Relative_Wife]")
@@ -1273,8 +1301,11 @@ namespace chaosaddon
                         goto NPCoverride; //either its a goto or ANOTHER flag. It just reads better for me using goto, and the label is pretty clear on what it does.
                     }
                 }
-                if ((seed % x > x / 2) && (data.Value.Age == NpcAge.Adult))
+                //(seed % x > x / 2)
+                if ( (data.Value.Age == NpcAge.Adult)) //Adults only!                                                                            //Seed mod x must be greater than the middle of all the possible values.                                                      //(not quite this in retrospect but it works)
                 {
+                    //Seed mod x must be greater than all the possible values.
+                    //(not quite this in retrospect but it works)
                     can = true;
                     noCanidates = false;
                     Assembly.GetAssembly(typeof(NPC))
@@ -1294,10 +1325,12 @@ namespace chaosaddon
                 }
 
             NPCoverride:
+                
                 data.Value.CanBeRomanced = can;
 
                 canRomance.TryAdd(data.Key, can);
                 x++;
+                
             }
 
 
@@ -1533,7 +1566,7 @@ namespace chaosaddon
             CATBULBSEEDSHOP.QualityModifierMode = StardewValley.GameData.QuantityModifier.QuantityModifierMode.Stack;
             CATBULBSEEDSHOP.ModData = null;
             CATBULBSEEDSHOP.PerItemCondition = null;
-
+        
 
             ///Bombseeds crop
             Bomb.Seasons = new List<Season> { Season.Summer, Season.Winter };
@@ -1692,11 +1725,11 @@ namespace chaosaddon
             catch (Exception e)
             {
                 Console.WriteLine("Chaosaddon: Ah fuck. Something in the Harmony patch \"GeteatObject\" went wrong.");
-
+                
             }
         }
-
-
+        
+        
 
 
         // REFRENCE

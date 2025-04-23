@@ -10,6 +10,46 @@
             "Action": "Load",
             "Target": "Maps/springobjects",
             "FromFile": "XNB files/Maps/springobjects.xnb"
+        },
+        {
+            "Action": "Load",
+            "Target": "Characters/Dialogue/MarriageDialogueWizard",
+            "FromFile": "XNB files/Characters/Dialogue/MarriageDialogueWizard.xnb"
+        },
+        {
+            "Action": "Load",
+            "Target": "Characters/Dialogue/MarriageDialoguePam",
+            "FromFile": "XNB files/Characters/Dialogue/MarriageDialoguePam.xnb"
+        },
+        {
+            "Action": "Load",
+            "Target": "Characters/Dialogue/MarriageDialogueClint",
+            "FromFile": "XNB files/Characters/Dialogue/MarriageDialogueClint.xnb"
+        },
+        {
+            "Action": "Load",
+            "Target": "Characters/Dialogue/MarriageDialogueLinus",
+            "FromFile": "XNB files/Characters/Dialogue/MarriageDialogueLinus.xnb"
+        },
+        {
+            "Action": "Load",
+            "Target": "Characters/Dialogue/MarriageDialogueWilly",
+            "FromFile": "XNB files/Characters/Dialogue/MarriageDialogueWilly.xnb"
+        },
+        {
+            "Action": "Load",
+            "Target": "Characters/Dialogue/MarriageDialogueGus",
+            "FromFile": "XNB files/Characters/Dialogue/MarriageDialogueGus.xnb"
+        },
+        {
+            "Action": "Load",
+            "Target": "Characters/Dialogue/MarriageDialogueDwarf",
+            "FromFile": "XNB files/Characters/Dialogue/MarriageDialogueDwarf.xnb"
+        },
+        {
+            "Action": "Load",
+            "Target": "Characters/Pam",
+            "FromFile": "XNB files/Characters/Pam.xnb"
         }
     ]
 }
