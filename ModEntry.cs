@@ -1301,8 +1301,8 @@ namespace chaosaddon
                         goto NPCoverride; //either its a goto or ANOTHER flag. It just reads better for me using goto, and the label is pretty clear on what it does.
                     }
                 }
-                //(seed % x > x / 2)
-                if ( (data.Value.Age == NpcAge.Adult)) //Adults only!                                                                            //Seed mod x must be greater than the middle of all the possible values.                                                      //(not quite this in retrospect but it works)
+                
+                if ((seed % x > x / 2) && (data.Value.Age == NpcAge.Adult)) //Adults only!                                                                            //Seed mod x must be greater than the middle of all the possible values.                                                      //(not quite this in retrospect but it works)
                 {
                     //Seed mod x must be greater than all the possible values.
                     //(not quite this in retrospect but it works)
