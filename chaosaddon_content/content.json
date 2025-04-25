@@ -48,6 +48,16 @@
         },
         {
             "Action": "Load",
+            "Target": "Characters/Dialogue/MarriageDialogueLewis",
+            "FromFile": "XNB files/Characters/Dialogue/MarriageDialogueLewis.xnb"
+        },
+        {
+            "Action": "Load",
+            "Target": "Characters/Dialogue/MarriageDialogueMarnie",
+            "FromFile": "XNB files/Characters/Dialogue/MarriageDialogueMarine.xnb"
+        },
+        {
+            "Action": "Load",
             "Target": "Characters/Pam",
             "FromFile": "XNB files/Characters/Pam.xnb"
         }
