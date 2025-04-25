@@ -54,7 +54,7 @@
         {
             "Action": "Load",
             "Target": "Characters/Dialogue/MarriageDialogueMarnie",
-            "FromFile": "XNB files/Characters/Dialogue/MarriageDialogueMarnine.xnb"
+            "FromFile": "XNB files/Characters/Dialogue/MarriageDialogueMarnie.xnb"
         },
         {
             "Action": "Load",
