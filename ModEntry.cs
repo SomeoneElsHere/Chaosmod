@@ -24,7 +24,6 @@ using Microsoft.VisualBasic;
 using StardewValley.Characters;
 using StardewValley.Menus;
 
-
 // TO-ADD LIST
 
 
@@ -78,7 +77,7 @@ namespace chaosaddon
 
         //items
 
-        
+
 
         //CRAFTING RECIPES
         CraftingRecipe Wood1;
@@ -104,12 +103,12 @@ namespace chaosaddon
 
         //love interests
 
-        Dictionary<string,bool> canRomance = new Dictionary<string,bool>();
+        Dictionary<string, bool> canRomance = new Dictionary<string, bool>();
 
 
         public override void Entry(IModHelper helper)
         {
-            
+
 
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
             helper.Events.GameLoop.DayStarted += this.OnDayStarted;
@@ -159,7 +158,7 @@ namespace chaosaddon
         {
             if (e.NameWithoutLocale.IsEquivalentTo("Data/NPCDispositions") && Game1.player != null && canRomance != null)
             {
-                Console.WriteLine("hello");
+
                 e.Edit(asset =>
                 {
                     var data = asset.AsDictionary<string, string>().Data;
@@ -170,7 +169,7 @@ namespace chaosaddon
                         {
                             data1.Value.Replace("/datable", "/not-datable");
                         }
-                        else if(data1.Value.Contains("/not-datable") && canRomance[data1.Key])
+                        else if (data1.Value.Contains("/not-datable") && canRomance[data1.Key])
                         {
                             data1.Value.Replace("/not-datable", "/datable");
                         }
@@ -180,7 +179,7 @@ namespace chaosaddon
                 });
             }
 
-              if (e.NameWithoutLocale.IsEquivalentTo("Data/Objects"))
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/Objects"))
             {
                 e.Edit(asset =>
                 {
@@ -219,7 +218,7 @@ namespace chaosaddon
                     data["493"].Name = "Holly Seeds";
 
 
-                    
+
 
                     ///CROP//
 
@@ -241,8 +240,8 @@ namespace chaosaddon
 
 
                     /// MATERIALS
-                    
-                    
+
+
                     /// Stone
                     data["390"].Price = 2;
                     data["390"].Description = "Rocky.";
@@ -263,7 +262,7 @@ namespace chaosaddon
                     data["612"].Description = "Barely edible.";
 
 
-                   
+
                     /// OTHER
                     /// purple shorts
 
@@ -342,7 +341,7 @@ namespace chaosaddon
                 e.Edit(asset =>
                 {
                     var data = asset.AsDictionary<string, ShopData>().Data;
-                    
+
 
                     /// Custom 
                     ///Beerseeds 
@@ -373,10 +372,10 @@ namespace chaosaddon
                     data.Add("Chaosmod_custom1", "Seems like it's been a while since you have been on the farm. ^ Maybe you have seen how time works in these parts, it can be crazy sometimes, right? ^^ Anyways, good luck in your endeavors.  -???[#]???");
                     data.Add("Chaosmod_custom2", "Wow! You seem to like this place? That or, you might hate it. ^ Oh well. These letters are not as much as a letter to you sometimes as it is a writing prompt. ^^ It's been a while since ive seen a person so involved in what I make... Maybe as a made up challenge, sure, but it still means a lot to me. ^ Welp, this has gone on for long enough. Good luck! -???[#]???");
                     data.Add("Chaosmod_custom3", "This whole project of mine was originally why I started on my coding journey on the first place...^ although I don't really see it as something I directly play a lot. ^ There was a lot more that I have made and wanted to add, but I just can't for various reasons. ^^ Despite this, ill create new content when I can. ^ I might get in trouble for saying this, but thank you, " + fourthwall + ". -SomeoneEls[#]SomeoneEls");
-                    
+
                     data.Add("WrongAddress1", "Hey. It's been a while, Yu. It's been a while since the incident way back in Inaba. ^I doubt I would ever get parole for what I did, but who cares about that yeah? ^^ Haha.. just kidding, I'm making plenty enough friends down where I am. Anyways, make sure you visit that old geezer sometime to make sure he's fine yeah? ^^ Just between me and you, I think he would want the company.");
                     data.Add("WrongAddress2", "HEY MAN! It's Joe. ^ I know I have a lot of work nowadays with all the gangs and shit but I was wonderin if you still want that old guitar that Neko stole.  ^ It's a bit too old for me nowadays, so I bought another, ...ya want it?^ ANYWAYS. Take care of ya self man!");
-                    
+
                     data.Add("FunFact1", "Fun fact: this is the first fun fact in written in the mod.");
                     data.Add("FunFact2", "Fun fact: Im typing this on homestuck day.");
                     data.Add("FunFact3", "Fun fact: If you look on the forms, I had a whole issue dealing with the datable varible while making this mod.");
@@ -426,7 +425,7 @@ namespace chaosaddon
             */
         }
 
-        
+
 
         /// START OF DAY CHANGES 
         private void OnDayStarted(object? sender, DayStartedEventArgs e)
@@ -440,7 +439,7 @@ namespace chaosaddon
 
 
 
-            
+
 
             //romances
             int seed = 0;
@@ -451,7 +450,7 @@ namespace chaosaddon
             }
             doRomance(seed);
 
-            
+
 
 
 
@@ -486,31 +485,31 @@ namespace chaosaddon
             }
 
             /// fun fact mail
-            if(Game1.dayOfMonth %10 == 0)
+            if (Game1.dayOfMonth % 10 == 0)
             {
-                    try
-                    {
-                        int random = new Random().Next(20);
-                        random++;
+                try
+                {
+                    int random = new Random().Next(20);
+                    random++;
                     Game1.addMail("FunFact" + random);
-                    }
-                    catch(Exception ek)
-                    {
+                }
+                catch (Exception ek)
+                {
 
-                    }
+                }
             }
 
             /// Rare mail
-             int r = new Random(DateAndTime.Now.Millisecond).Next(128);
-             if(r == 1)
-             {
+            int r = new Random(DateAndTime.Now.Millisecond).Next(128);
+            if (r == 1)
+            {
                 Game1.addMail("WrongAddress1");
-             }
-             if(r == 2 )
-             {
+            }
+            if (r == 2)
+            {
                 Game1.addMail("WrongAddress2");
-             }
-            
+            }
+
 
             //SLEEP CHANGES
 
@@ -532,7 +531,7 @@ namespace chaosaddon
             }
 
 
-            
+
 
 
             //CURSES
@@ -546,22 +545,23 @@ namespace chaosaddon
             switch (CurCurse)
             {
                 case 0:
-                    SuperSpeed = new Thread(new ParameterizedThreadStart(SuperSpeedCurse));
+                    new Thread(() => Console.WriteLine("aasdf")).Start();
+                    SuperSpeed = new Thread(SuperSpeedCurse);
                     SuperSpeed.Start();
                     Game1.hudMessages.Add(new HUDMessage("You have Super Speed"));
                     break;
                 case 1:
-                    Jump = new Thread(new ParameterizedThreadStart(JumpCurse));
+                    Jump = new Thread(JumpCurse);
                     Jump.Start();
                     Game1.hudMessages.Add(new HUDMessage("You now get scared easily."));
                     break;
                 case 2:
-                    Blue = new Thread(new ParameterizedThreadStart(BlueCurse));
+                    Blue = new Thread(BlueCurse);
                     Blue.Start();
                     Game1.hudMessages.Add(new HUDMessage("Your blue aba dee aba die"));
                     break;
                 case 3:
-                    Seasonal = new Thread(new ParameterizedThreadStart(SeasonalCurse));
+                    Seasonal = new Thread(SeasonalCurse);
                     Seasonal.Start();
                     break;
 
@@ -635,7 +635,7 @@ namespace chaosaddon
                     }
             }
         }
-
+        
         /// CONSTANT CHANGES
         private void OnUpdateTicked(object? sender, UpdateTickedEventArgs e)
         {
@@ -656,7 +656,7 @@ namespace chaosaddon
 
 
 
-          
+
         private async void OnTimeChanged(object? sender, TimeChangedEventArgs e)
         {
 
@@ -666,11 +666,11 @@ namespace chaosaddon
 
             //fixing it so you can shop at clints even if you are married to him.
 
-            if(Game1.timeOfDay == 900 && Game1.player.getSpouse() != null && Game1.player.getSpouse().Name == "Clint")
+            if (Game1.timeOfDay == 900 && Game1.player.getSpouse() != null && Game1.player.getSpouse().Name == "Clint")
             {
                 Game1.warpCharacter(Game1.getCharacterFromName("Clint"), "Blacksmith", new Vector2(3, 13));
             }
-            else if(Game1.timeOfDay == 1600 && Game1.player.getSpouse() != null && Game1.player.getSpouse().Name == "Clint")
+            else if (Game1.timeOfDay == 1600 && Game1.player.getSpouse() != null && Game1.player.getSpouse().Name == "Clint")
             {
 
                 Game1.warpCharacter(Game1.getCharacterFromName("Clint"), Game1.locations[0], new Vector2(34, 5));
@@ -775,7 +775,7 @@ namespace chaosaddon
 
                         }
                         break;
-                    
+
 
 
                 }
@@ -848,7 +848,8 @@ namespace chaosaddon
 
         private void randomWarpEvent(object obj)
         {
-            while(Game1.player.IsBusyDoingSomething())
+            int times = 0;
+            while (Game1.player.IsBusyDoingSomething())
             {
 
             }
@@ -866,28 +867,28 @@ namespace chaosaddon
                 Vector2 vect;
                 GameLocation playerLocat = Game1.player.currentLocation;
                 Vector2 playerVect = Game1.player.Tile;
-          
+
                 try
                 {
-                    
+
                     //Looks at the diagonal left half of the map for an empty tile.
                     for (int y = 1; true; y++)
                     {
-                        for (int x = 1; x<y; x++)
+                        for (int x = 1; x < y; x++)
                         {
                             Vector2 buf = new Vector2(x, y);
                             if (!locat.IsTileBlockedBy(buf))
                             {
                                 vect = buf;
 
-                                
+
                                 int r = new Random().Next(0, 64);
-                                if (r==3)
+                                if (r == 3)
                                 {
                                     // I fucking hate using goto here as goto sucks but its better than trying to create a complex break system that works with vector2 buf, as buf cannot be null.
                                     goto randomWarpEvent_outOfLoop;
                                 }
-                                
+                                times++;
                             }
                         }
                     }
@@ -896,12 +897,8 @@ namespace chaosaddon
                 catch (Exception e)
                 {
                     //keep doing it until it works, since using goto causes issues. This is pretty cursed though. I'm sorry for my crimes.
-                    
-                    if (GC.GetTotalMemory(false)> 1073741824)
+                    if(times>100)
                     {
-                        //This doesnt really need to be here, but just in case you are SUPER unlucky and this loop goes on for far too long, no crash will happen.
-                        // In reality, if this executes there is something very wrong. (ie, there is more than a GB of memory that is being used?!?!) 
-                        Console.WriteLine("Chaosaddon: Random warp failed due to lack of memory (OVER 1 GB OF MEMORY USED)");
                         return;
                     }
                     randomWarpEvent(obj);
@@ -927,7 +924,7 @@ namespace chaosaddon
 
 
             }
-            catch(Exception e)
+            catch (Exception e)
             {
 
             }
@@ -984,24 +981,27 @@ namespace chaosaddon
 
         //CURSES
 
-        public void SuperSpeedCurse(object obj)
+        public void SuperSpeedCurse()
         {
 
-            while (CurseActive)
+            try
             {
-                try
+                while (CurseActive)
                 {
+
                     Game1.player.Speed = 7;
                 }
-                catch (NullReferenceException e)
-                {
-                    break;
-                }
             }
+            catch(Exception e)
+            {
+
+            }
+                
+            
 
         }
 
-        public void JumpCurse(object obj)
+        public void JumpCurse()
         {
             try
             {
@@ -1030,18 +1030,18 @@ namespace chaosaddon
 
             }
         }
-        public void BlueCurse(object obj)
+        public void BlueCurse()
         {
             try
             {
                 ///player data to revert
                 int SkinOG = Game1.player.skin.Value;
-                Color HairOG = Game1.player.hairstyleColor.Get();
+                Microsoft.Xna.Framework.Color HairOG = Game1.player.hairstyleColor.Get();
 
 
                 ///changing data
                 Game1.player.changeSkinColor(16);
-                Game1.player.changeHairColor(new Color(0, 0, 255));
+                Game1.player.changeHairColor(new Microsoft.Xna.Framework.Color(0, 0, 255));
 
                 while (CurseActive)
                 {
@@ -1060,7 +1060,7 @@ namespace chaosaddon
         }
 
 
-        public void SeasonalCurse(object obj)  /// 
+        public void SeasonalCurse()  /// 
         {
             try
             {
@@ -1156,7 +1156,7 @@ namespace chaosaddon
             buffDataMusic.LuckLevel = 3;
 
             buffEffectsMusic = new BuffEffects(buffDataMusic);
-            
+
             int val = 0;
             while (true)
             {
@@ -1262,7 +1262,7 @@ namespace chaosaddon
                         {
                             Game1.addHUDMessage(new HUDMessage(npc.Name + " : " + loc.Name + " at " + npc.Tile.X + "," + npc.Tile.Y));
                             return npc;
-                            
+
                         }
 
                     }
@@ -1290,7 +1290,7 @@ namespace chaosaddon
                 }
                 foreach (var data2 in data.Value.FriendsAndFamily) //Remove any married ppl from the pool
                 {
-                    
+
                     if (data2.Value == "[LocalizedText Strings\\Characters:Relative_Husband]" || data2.Value == "[LocalizedText Strings\\Characters:Relative_Wife]")
                     {
                         can = false;
@@ -1299,10 +1299,11 @@ namespace chaosaddon
                             .GetField("datable")
                              .SetValue(n, f);
                         goto NPCoverride; //either its a goto or ANOTHER flag. It just reads better for me using goto, and the label is pretty clear on what it does.
+
                     }
                 }
-                
-                if ((seed % x > x / 2) && (data.Value.Age == NpcAge.Adult)) //Adults only!                                                                            //Seed mod x must be greater than the middle of all the possible values.                                                      //(not quite this in retrospect but it works)
+
+                if ((seed % x > x / 2) && (data.Value.Age == NpcAge.Adult)) //Adults only! 
                 {
                     //Seed mod x must be greater than all the possible values.
                     //(not quite this in retrospect but it works)
@@ -1325,23 +1326,23 @@ namespace chaosaddon
                 }
 
             NPCoverride:
-                
+
                 data.Value.CanBeRomanced = can;
 
                 canRomance.TryAdd(data.Key, can);
                 x++;
-                
+
             }
 
 
-            if(noCanidates)
+            if (noCanidates)
             {
                 doRomance(++seed);
             }
 
 
         }
-      
+
 
         // NEW CHANGES
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
@@ -1355,9 +1356,6 @@ namespace chaosaddon
 
             BPMData.initalize();
             BPM = BPMData.getData();
-            
-
-
 
 
 
@@ -1566,7 +1564,7 @@ namespace chaosaddon
             CATBULBSEEDSHOP.QualityModifierMode = StardewValley.GameData.QuantityModifier.QuantityModifierMode.Stack;
             CATBULBSEEDSHOP.ModData = null;
             CATBULBSEEDSHOP.PerItemCondition = null;
-        
+
 
             ///Bombseeds crop
             Bomb.Seasons = new List<Season> { Season.Summer, Season.Winter };
@@ -1589,7 +1587,7 @@ namespace chaosaddon
             Bomb.CountForMonoculture = true;
             Bomb.CountForPolyculture = true;
             Bomb.CustomFields = null;
-            
+
             ///Bombseeds 
 
             Bombseeds.Name = "Bomb Seeds";
@@ -1690,7 +1688,7 @@ namespace chaosaddon
         //    };
         ///}
 
-        
+
 
         ///Slingshot for CATBULB
         ///*
@@ -1725,11 +1723,11 @@ namespace chaosaddon
             catch (Exception e)
             {
                 Console.WriteLine("Chaosaddon: Ah fuck. Something in the Harmony patch \"GeteatObject\" went wrong.");
-                
+
             }
         }
-        
-        
+
+
 
 
         // REFRENCE
@@ -1894,4 +1892,3 @@ Cellar8 86
 }
 
 
-        
