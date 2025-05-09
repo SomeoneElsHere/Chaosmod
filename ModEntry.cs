@@ -23,6 +23,24 @@ using StardewValley.Minigames;
 using Microsoft.VisualBasic;
 using StardewValley.Characters;
 using StardewValley.Menus;
+using StardewValley.ItemTypeDefinitions;
+using StardewValley.Objects;
+using StardewValley.Inventories;
+using StardewValley.GameData.HomeRenovations;
+using System.Drawing;
+using System.Xml.Linq;
+using StardewValley.GameData.BigCraftables;
+using Force.DeepCloner;
+using chaosaddon;
+using System.Xml.Serialization;
+using Netcode;
+using System.Reflection.PortableExecutable;
+using StardewValley.GameData.Machines;
+using Microsoft.VisualBasic.FileIO;
+using System.Collections.Immutable;
+using StardewValley.GameData.Buildings;
+using StardewValley.GameData.FishPonds;
+using System.Runtime.CompilerServices;
 
 // TO-ADD LIST
 
@@ -42,11 +60,29 @@ using StardewValley.Menus;
 /// /// <inheritdoc cref="IContentEvents.AssetRequested"/>
 /// <param name="sender">The event sender.</param>
 /// <param name="e">The event data.</param>
+/// 
+
 namespace chaosaddon
 {
+    struct DCpair
+    {
+        public Chest donor;
+        public Chest rec;
+        public StardewValley.Object donorM;
+        public StardewValley.Object recM;
+
+    }
+
+
+
 
     internal class ModEntry : Mod
     {
+        //Reflection
+
+
+
+
         //data. readonly pls ;u; (bc of shallow copy)
         Dictionary<string, int> BPM = new Dictionary<string, int>();
 
@@ -75,8 +111,14 @@ namespace chaosaddon
         Buff musicAttack;
 
 
-        //items
+        //OBJECTS
 
+        /// DirectionChest
+
+        BigCraftableData dcup = new BigCraftableData();
+        BigCraftableData dcdown = new BigCraftableData();
+        BigCraftableData dcleft = new BigCraftableData();
+        BigCraftableData dcright = new BigCraftableData();
 
 
         //CRAFTING RECIPES
@@ -105,6 +147,12 @@ namespace chaosaddon
 
         Dictionary<string, bool> canRomance = new Dictionary<string, bool>();
 
+        //Direction chest pairs.
+
+        static Dictionary<Chest, DCpair> DCpairs = new Dictionary<Chest, DCpair>();
+
+        static Dictionary<StardewValley.Buildings.Building, Chest> Bpairs = new Dictionary<StardewValley.Buildings.Building, Chest>();
+
 
         public override void Entry(IModHelper helper)
         {
@@ -117,6 +165,9 @@ namespace chaosaddon
             helper.Events.GameLoop.TimeChanged += this.OnTimeChanged;
             helper.Events.GameLoop.DayEnding += this.OnDayEnding;
             helper.Events.Player.InventoryChanged += this.OnInventoryChanged;
+            helper.Events.Display.Rendered += this.OnRendered;
+            helper.Events.Display.RenderedWorld += this.OnRenderedWorld;
+
 
             var harmony = new Harmony(this.ModManifest.UniqueID);
             //Harmony.DEBUG = true;
@@ -130,14 +181,23 @@ namespace chaosaddon
             original: AccessTools.Method(typeof(Farmer), nameof(Farmer.eatObject)),
             prefix: new HarmonyMethod(typeof(ModEntry), nameof(GeteatObject))
             );
+            harmony.Patch(
+            original: AccessTools.Method(typeof(StardewValley.Object), nameof(StardewValley.Object.placementAction)),
+            prefix: new HarmonyMethod(typeof(ModEntry), nameof(GetplacementAction)),
+            postfix: new HarmonyMethod(typeof(ModEntry), nameof(GetplacementAction2))
+            );
+
+            harmony.Patch(
+            original: AccessTools.Method(typeof(StardewValley.Object), nameof(StardewValley.Object.performRemoveAction)),
+            postfix: new HarmonyMethod(typeof(ModEntry), nameof(GetperformRemoveAction))
+            );
 
 
-            /*
             harmony.Patch(
             original: AccessTools.Method(typeof(BuffManager), nameof(BuffManager.Update)),
             transpiler: new HarmonyMethod(typeof(ModEntry), nameof(BuffUpdate_Transpiler))
             );
-            */
+
 
 
 
@@ -400,31 +460,48 @@ namespace chaosaddon
 
                 });
             }
-            /*
-            if (e.NameWithoutLocale.IsEquivalentTo("Data"))
+
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/BigCraftables"))
+            {
+                e.Edit(asset =>
+                {
+                    var data = asset.AsDictionary<string, BigCraftableData>().Data;
+
+                    data.Add("DirectionChestUp", dcup);
+                    data.Add("DirectionChestDown", dcdown);
+                    data.Add("DirectionChestLeft", dcleft);
+                    data.Add("DirectionChestRight", dcright);
+                });
+            }
+
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/CraftingRecipes"))
             {
                 e.Edit(asset =>
                 {
                     var data = asset.AsDictionary<string, string>().Data;
-                    //who needs content packs when you can just do in it in c# /hj
 
-                    string fourthwall = Environment.UserName;
-
-                    data["Robin"] = "Heya. ^ Its been a while, right? ^ Anyways, here's some wood. Don't mind the description. ^ -Robin %item id (O)709 50 %%[#]Wood from your house.";
-                    data["Demetrius"] = "Hello there, @. ^ I forgot what this was, it was back inside my house somewhere, and I decided I didn't need it anymore. ^ I Hope you find it useful. ^-Demetrius%item id (O)346 1 %%[#] Some stuff Demetrius found.";
-                    data["afterSamShow"] = "TELL ME THE FICTION, ILL SIT BACK AND LISTEN ^ THIS TIME WILL BE DIFFERENT ^ THE B-B-BULLSHIT ^ THE ENDLESS COMMITMENT ^ (...It keeps going. Wow.) ^ -Sam[#]Seems someone is a Q-bomb fan. ";
-
-
-                    data.Add("Chaosmod_custom1", "Seems like it's been a while since you have been on the farm. ^ Maybe you have seen how time works in these parts, it can be crazy sometimes, right? ^^ Anyways, good luck in your endeavors.  ^ -???[#]???");
-                    data.Add("Chaosmod_custom2", "Wow! You seem to like this place? That or, you might hate it. ^ Oh well. These letters are not as much as a letter to you sometimes as it is a writing prompt. ^^ It's been a while since ive seen a person so involved in what I make... Maybe as a made up challenge, sure, but it still means a lot to me. ^ Welp, this has gone on for long enough. Good luck! ^ -???[#]???");
-                    data.Add("Chaosmod_custom3", "This whole project of mine was originally why I started on my coding journey on the first place...^ although I don't really see it as something I directly play a lot. ^ There was a lot more that I have made and wanted to add, but I just can't for various reasons. ^^ Despite this, i'll create new content when I can. ^ I might get in trouble for saying this, but thank you, " + fourthwall + ". ^ -SomeoneEls[#]SomeoneEls");
-
+                    data.Add("DirectionChestUp", "388 50/Home/DirectionChestUp/true/default/");
+                    data.Add("DirectionChestDown", "388 50/Home/DirectionChestDown/true/default/");
+                    data.Add("DirectionChestLeft", "388 50/Home/DirectionChestLeft/true/default/");
+                    data.Add("DirectionChestRight", "388 50/Home/DirectionChestRight/true/default/");
                 });
-                
             }
-            */
         }
 
+
+
+        ///DISPLAY
+
+        private void OnRendered(object sender, RenderedEventArgs e)
+        {
+
+
+        }
+
+        private void OnRenderedWorld(object sender, RenderedWorldEventArgs e)
+        {
+
+        }
 
 
         /// START OF DAY CHANGES 
@@ -433,8 +510,15 @@ namespace chaosaddon
             //Thread teleport = new Thread(new ParameterizedThreadStart(randomWarpEvent));
             //teleport.Start(); //starts a teleport (see randomWarpEvent)
             //debug
+
+
+
             SoundBank soundBank = this.Helper.Reflection.GetField<SoundBank>(Game1.soundBank, "soundBank").GetValue();
             IEnumerable<CueDefinition> cues = this.Helper.Reflection.GetField<Dictionary<string, CueDefinition>>(soundBank, "_cues").GetValue().Values;
+
+
+            ///Reflection
+
 
 
 
@@ -451,10 +535,11 @@ namespace chaosaddon
             doRomance(seed);
 
 
+            //Direction chests
 
+            InitiateDirectionChests();
 
-
-
+            InitiateBuildingChests();
 
             //Game1.player.addItemToInventory((Item)new StardewValley.Object("288", 1, false, 10, 0));
             /// Misc threads
@@ -545,7 +630,7 @@ namespace chaosaddon
             switch (CurCurse)
             {
                 case 0:
-                    new Thread(() => Console.WriteLine("aasdf")).Start();
+
                     SuperSpeed = new Thread(SuperSpeedCurse);
                     SuperSpeed.Start();
                     Game1.hudMessages.Add(new HUDMessage("You have Super Speed"));
@@ -568,6 +653,9 @@ namespace chaosaddon
             }
 
         }
+
+
+
 
 
 
@@ -635,11 +723,11 @@ namespace chaosaddon
                     }
             }
         }
-        
+
         /// CONSTANT CHANGES
         private void OnUpdateTicked(object? sender, UpdateTickedEventArgs e)
         {
-            
+
         }
 
         /// EXP
@@ -688,6 +776,42 @@ namespace chaosaddon
             }
 
 
+            //Direction chests
+
+            foreach (KeyValuePair<Chest, DCpair> pair in DCpairs)
+            {
+
+                if (pair.Value.rec != null && pair.Value.donor != null)
+                {
+                    // Console.WriteLine("Rec:" + pair.Value.rec.tileLocation.X + " " + pair.Value.rec.tileLocation.Y);
+                    // Console.WriteLine("Don:" + pair.Value.donor.tileLocation.X + " " + pair.Value.donor.tileLocation.Y);
+                    transfer1(pair.Key, pair.Value.donor, pair.Value.rec);
+                }
+                else if (pair.Value.recM != null && pair.Value.donorM != null)
+                {
+                   // Console.WriteLine("Rec:" + pair.Value.recM.tileLocation.X + " " + pair.Value.recM.tileLocation.Y);
+                   // Console.WriteLine("Don:" + pair.Value.donorM.tileLocation.X + " " + pair.Value.donorM.tileLocation.Y);
+                    transfer2(pair.Key, pair.Value.donorM, pair.Value.recM);
+                }
+                else if (pair.Value.recM != null && pair.Value.donor != null)
+                {
+                   // Console.WriteLine("Rec:" + pair.Value.recM.tileLocation.X + " " + pair.Value.recM.tileLocation.Y);
+                    //Console.WriteLine("Don:" + pair.Value.donor.tileLocation.X + " " + pair.Value.donor.tileLocation.Y);
+                    transfer3(pair.Key, pair.Value.donor, pair.Value.recM);
+                }
+                else if (pair.Value.rec != null && pair.Value.donorM != null)
+                {
+                    // Console.WriteLine("Rec:" + pair.Value.rec.tileLocation.X + " " + pair.Value.rec.tileLocation.Y);
+                   // Console.WriteLine("Don:" + pair.Value.donorM.tileLocation.X + " " + pair.Value.donorM.tileLocation.Y);
+                    transfer4(pair.Key, pair.Value.donorM, pair.Value.rec);
+                }
+
+            }
+            //Console.WriteLine("---------");
+            foreach(KeyValuePair<StardewValley.Buildings.Building,Chest> pair in Bpairs)
+            {
+                transferB(pair.Key,pair.Value);
+            }
 
             ///Random events
 
@@ -897,7 +1021,7 @@ namespace chaosaddon
                 catch (Exception e)
                 {
                     //keep doing it until it works, since using goto causes issues. This is pretty cursed though. I'm sorry for my crimes.
-                    if(times>100)
+                    if (times > 100)
                     {
                         return;
                     }
@@ -992,12 +1116,12 @@ namespace chaosaddon
                     Game1.player.Speed = 7;
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
 
             }
-                
-            
+
+
 
         }
 
@@ -1342,8 +1466,548 @@ namespace chaosaddon
 
 
         }
+        //DIrection chests
+        static void InitiateDirectionChests()
+        {
+            DCpairs = new Dictionary<Chest, DCpair>();
 
 
+            int x = 0;
+            int y = 0;
+
+            foreach (GameLocation loc in Game1.locations)  // for every game location
+            {
+                for (y = 0; y < 100; y++)
+                {
+                    for (x = 0; x < 100; x++)
+                    {
+                        if (loc.hasTileAt(x, y, "Back"))
+                        {
+                            if (loc.getObjectAtTile(x, y) != null && loc.getObjectAtTile(x, y).ItemId.Contains("DirectionChest")) //if the object in the tile is a direction chest
+                            {
+                                Chest DC = (Chest)loc.getObjectAtTile(x, y);
+                                Vector2 upv = new Vector2(x, y + 1);
+                                Vector2 downv = new Vector2(x, y - 1);
+                                Vector2 leftv = new Vector2(x - 1, y);
+                                Vector2 rightv = new Vector2(x + 1, y);
+
+                                // Does the up and down tiles have an object? Or do the left and right tiles have an object?
+                                if ((!loc.CanItemBePlacedHere(upv) && !loc.CanItemBePlacedHere(downv)) || (!loc.CanItemBePlacedHere(leftv) && !loc.CanItemBePlacedHere(rightv)))
+                                {
+                                    StardewValley.Object donor = null;
+                                    StardewValley.Object rec = null;
+
+                                    switch (DC.ItemId)  //find the first adjacent chests.
+                                    {
+                                        case "DirectionChestLeft":
+                                            donor = DC.Location.getObjectAtTile((int)x + 1, (int)y);
+                                            rec = DC.Location.getObjectAtTile((int)x - 1, (int)y);
+                                            break;
+                                        case "DirectionChestRight":
+                                            donor = DC.Location.getObjectAtTile((int)x - 1, (int)y);
+                                            rec = DC.Location.getObjectAtTile((int)x + 1, (int)y);
+                                            break;
+                                        case "DirectionChestUp":
+                                            donor = DC.Location.getObjectAtTile((int)x, (int)y + 1);
+                                            rec = DC.Location.getObjectAtTile((int)x, (int)y - 1);
+                                            break;
+                                        case "DirectionChestDown":
+                                            donor = DC.Location.getObjectAtTile((int)x, (int)y - 1);
+                                            rec = DC.Location.getObjectAtTile((int)x, (int)y + 1);
+                                            break;
+
+                                    }
+
+                                    if (donor != null && rec != null && donor.ItemId.Contains("DirectionChest") && rec.ItemId.Contains("DirectionChest")) // if both donor and rec are direction chests, then the given chest is on a path and is not counted.
+                                    {
+                                        continue;
+                                    }
+                                    else
+                                    {
+
+                                        startTransfer(DC, donor, rec); //else, try to start a transfer.
+                                    }
+
+                                }
+
+                            }
+
+                        }
+                    }
+
+                }
+            }
+        }
+        static public void startTransfer(Chest DC, StardewValley.Object donor, StardewValley.Object rec)
+        {
+            int uhoh = 0;
+            float x = DC.TileLocation.X;
+            float y = DC.TileLocation.Y;
+
+            if (rec == null || donor == null)
+            {
+                return;
+            }
+
+
+            try
+            {
+                while (donor.ItemId.Contains("DirectionChest"))  //find the parent donor obj if it exists
+                {
+                    float x1 = donor.TileLocation.X;
+                    float y1 = donor.tileLocation.Y;
+
+
+                    switch (donor.ItemId)
+                    {
+                        case "DirectionChestLeft":
+                            if (donor.Location.CanItemBePlacedHere(new Vector2((int)x1 + 1, (int)y1)))
+                            {
+                                return;  //return if oob
+                            }
+
+                            donor = donor.Location.getObjectAtTile((int)x1 + 1, (int)y1);
+                            break;
+                        case "DirectionChestRight":
+                            if (donor.Location.CanItemBePlacedHere(new Vector2((int)x1 - 1, (int)y1)))
+                            {
+                                return;
+                            }
+                            donor = donor.Location.getObjectAtTile((int)x1 - 1, (int)y1);
+                            break;
+                        case "DirectionChestUp":
+                            if (donor.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 + 1)))
+                            {
+                                return;
+                            }
+                            donor = donor.Location.getObjectAtTile((int)x1, (int)y1 + 1);
+
+                            break;
+                        case "DirectionChestDown":
+                            if (donor.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 - 1)))
+                            {
+                                return;
+                            }
+                            donor = donor.Location.getObjectAtTile((int)x1, (int)y1 - 1);
+                            break;
+
+                    }
+                    if (++uhoh > 100)
+                    {
+                        return;
+                    }
+                }
+            }
+            catch (NullReferenceException one)
+            {
+                donor = new Chest();
+                return;
+            }
+
+
+
+
+            uhoh = 0;
+
+            try
+            {
+                while (rec.ItemId.Contains("DirectionChest"))  // find parent rec if it exists
+                {
+                    float x1 = rec.TileLocation.X;
+                    float y1 = rec.tileLocation.Y;
+
+                    switch (rec.ItemId)
+                    {
+                        case "DirectionChestLeft":
+                            if (rec.Location.CanItemBePlacedHere(new Vector2((int)x1 - 1, (int)y1)))
+                            {
+                                return;
+                            }
+                            rec = rec.Location.getObjectAtTile((int)x1 - 1, (int)y1);
+                            break;
+                        case "DirectionChestRight":
+                            if (rec.Location.CanItemBePlacedHere(new Vector2((int)x1 + 1, (int)y1)))
+                            {
+                                return;
+                            }
+                            rec = rec.Location.getObjectAtTile((int)x1 + 1, (int)y1);
+                            break;
+                        case "DirectionChestUp":
+                            if (rec.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 - 1)))
+                            {
+                                return;
+                            }
+                            rec = rec.Location.getObjectAtTile((int)x1, (int)y1 - 1);
+                            break;
+                        case "DirectionChestDown":
+                            if (rec.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 + 1)))
+                            {
+                                return;
+                            }
+                            rec = rec.Location.getObjectAtTile((int)x1, (int)y1 + 1);
+                            break;
+
+                    }
+
+                    if (++uhoh > 100)
+                    {
+                        return;
+                    }
+                }
+            }
+            catch (NullReferenceException two)
+            {
+                rec = new Chest();
+                return;
+            }
+
+
+            if (rec == null || donor == null)
+            {
+                return;
+            }
+
+            
+
+            if (rec as Chest != null && donor as Chest != null)
+            {
+                DCpair d = new DCpair();
+                d.rec = (Chest)rec;
+                d.donor = (Chest)donor;
+                DCpairs.Add(DC, d);
+
+                transfer1(DC, ((Chest)donor), ((Chest)rec)); // transfer items
+            }
+            else if (rec.GetMachineData() != null && donor.GetMachineData() != null)
+            {
+
+                DCpair d = new DCpair();
+                d.recM = rec;
+                d.donorM = donor;
+                DCpairs.Add(DC, d);
+
+                transfer2(DC, donor, rec);
+            }
+            else if (rec.GetMachineData() != null && donor as Chest != null)
+            {
+                DCpair d = new DCpair();
+                d.recM = rec;
+                d.donor = (Chest)donor;
+                DCpairs.Add(DC, d);
+
+                transfer3(DC, ((Chest)donor), (rec));
+            }
+            else if (rec as Chest != null && donor.GetMachineData() != null)
+            {
+
+                DCpair d = new DCpair();
+                d.rec = (Chest)rec;
+                d.donorM = donor;
+                DCpairs.Add(DC, d);
+
+                transfer4(DC, donor, ((Chest)rec));
+            }
+
+        }
+
+        static void transfer1(Chest DC, Chest d, Chest r) //object transfer based on 2 chests
+        {
+            foreach (StardewValley.Object obj in d.Items)
+            {
+
+                foreach (StardewValley.Object item in DC.Items)
+                {
+                    if (obj != null && item != null && r.Items.CountItemStacks() < 32 && item.ItemId == obj.ItemId)
+                    {
+                        if (obj as ColoredObject != null)
+                        {
+                            ColoredObject obj2 = new ColoredObject();
+                            obj.DeepCloneTo(obj2);
+                            d.Items.Reduce(obj, 1);
+                            obj2.Stack = 1;
+                            if (r.Items.ContainsId(obj2.ItemId))
+                            {
+                                bool isadded = false;
+                                foreach (Item i in r.Items.GetById(obj2.ItemId))
+                                {
+                                    if (i.Stack != i.maximumStackSize())
+                                    {
+                                        i.Stack++;
+                                        isadded = true;
+                                        break;
+                                    }
+                                }
+                                if (!isadded)
+                                {
+                                    r.Items.Add(obj2);
+                                }
+
+                            }
+                            else
+                            {
+                                r.Items.Add(obj2);
+                            }
+                        }
+                        else
+                        {
+                            StardewValley.Object obj2 = new StardewValley.Object();
+                            obj.DeepCloneTo(obj2);
+                            d.Items.Reduce(obj, 1);
+                            obj2.Stack = 1;
+                            if (r.Items.ContainsId(obj2.ItemId))
+                            {
+                                bool isadded = false;
+                                foreach (Item i in r.Items.GetById(obj2.ItemId))
+                                {
+                                    if (i.Stack != i.maximumStackSize())
+                                    {
+                                        i.Stack++;
+                                        isadded = true;
+                                        break;
+                                    }
+                                }
+                                if (!isadded)
+                                {
+                                    r.Items.Add(obj2);
+                                }
+
+                            }
+                            else
+                            {
+                                r.Items.Add(obj2);
+                            }
+                        }
+                        
+                        
+                    }
+                }
+
+
+            }
+        }
+
+        static void transfer2(Chest DC, StardewValley.Object d, StardewValley.Object r)
+        {
+            Farmer f = new Farmer();
+            f.Items.Add(d.heldObject.Value);
+            if (d.heldObject.Value != null && d.MinutesUntilReady == 0 && r.MinutesUntilReady == 0 && d.readyForHarvest.Value && !r.readyForHarvest.Value && r.heldObject.Value == null)
+            {
+                StardewValley.Object o = new StardewValley.Object();
+                d.heldObject.Value.DeepCloneTo(o);
+                d.heldObject.Value = null;
+                if (!MachineDataUtility.HasAdditionalRequirements(f.Items, r.GetMachineData().AdditionalConsumedItems, out var failedRequirement))
+                {
+                    return;
+                }
+                MachineOutputRule output = null;
+                MachineOutputTriggerRule outputrule = null;
+                MachineOutputRule ignorecount = null;
+                MachineOutputTriggerRule ignoreoutputrule = null;
+
+                //here is my little if statement pit. its better than having it in one big line so it exits.
+                if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.None, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
+                {
+                    if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.DayUpdate, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
+                    {
+                        if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.ItemPlacedInMachine, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
+                        {
+                            if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.MachinePutDown, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
+                            {
+                                if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.OutputCollected, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
+                                {
+
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+                }
+                if (o.Stack < output.Triggers[0].RequiredCount)
+                {
+                    return;
+                }
+                r.PlaceInMachine(r.GetMachineData(), o, false, f);
+            }
+
+
+
+        }
+
+        static void transfer3(Chest DC, Chest d, StardewValley.Object r)
+        {
+            Farmer f = new Farmer();
+            f.Items.AddRange(d.Items);
+            foreach (StardewValley.Object o in d.Items)
+            {
+                StardewValley.Object DCo = (StardewValley.Object)DC.Items[0];
+                if (o == null || DCo == null || r.heldObject == null)
+                {
+                    return;
+                }
+
+
+                if (o.ItemId == DCo.ItemId && !r.readyForHarvest.Value && r.MinutesUntilReady == 0 && r.heldObject.Value == null)
+                {
+                    MachineOutputRule output = null;
+                    MachineOutputTriggerRule outputrule = null;
+                    MachineOutputRule ignorecount = null;
+                    MachineOutputTriggerRule ignoreoutputrule = null;
+                    if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.None, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
+                    {
+                        if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.DayUpdate, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
+                        {
+                            if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.ItemPlacedInMachine, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
+                            {
+                                if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.MachinePutDown, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
+                                {
+                                    if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.OutputCollected, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
+                                    {
+
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+
+
+                    if (o.Stack < output.Triggers[0].RequiredCount)
+                    {
+                        return;
+                    }
+
+
+
+
+                    r.PlaceInMachine(r.GetMachineData(), o, false, f);
+
+                    d.Items.Reduce(o, output.Triggers[0].RequiredCount);
+                    f.Items.Reduce(o, output.Triggers[0].RequiredCount);
+
+                    return;
+                }
+                else if (r.heldObject.Value == null && r.MinutesUntilReady != 0)
+                {
+                    r.MinutesUntilReady = 0;
+
+                }
+
+            }
+
+        }
+        static void transfer4(Chest DC, StardewValley.Object d, Chest r)
+        {
+            foreach (StardewValley.Object DCo in DC.Items)
+            {
+
+
+                if (DCo != null && d.heldObject.Value != null && d.readyForHarvest.Value && r.Items.CountItemStacks() < 32 && d.heldObject.Value.ItemId == DCo.ItemId)
+                {
+
+                    StardewValley.Object o = new StardewValley.Object();
+                    d.heldObject.Value.DeepCloneTo(o);
+                    d.heldObject.Value = null;
+
+
+                    if (r.Items.ContainsId(o.ItemId))
+                    {
+                        bool isadded = false;
+                        foreach (Item i in r.Items.GetById(o.ItemId))
+                        {
+                            if (i.Stack != i.maximumStackSize())
+                            {
+                                i.Stack++;
+                                isadded = true;
+                                break;
+                            }
+                        }
+                        if (!isadded)
+                        {
+                            r.Items.Add(o);
+                        }
+
+                    }
+                    else
+                    {
+                        r.Items.Add(o);
+                    }
+
+                }
+            }
+        }
+
+
+        static void InitiateBuildingChests()
+        {
+            Bpairs = new Dictionary<StardewValley.Buildings.Building, Chest>();
+
+            foreach (GameLocation loc in Game1.locations)  // for every game location
+            {
+                Chest B;
+                
+                foreach(StardewValley.Buildings.Building b in loc.buildings) //search the surrounding tiles for a chest
+                {
+                    for (int x = b.tileX.Value; x<b.tilesWide.Value+ b.tileX.Value; x++)
+                    {
+                       
+                        if (loc.isObjectAtTile(x, b.tileY.Value - 1)&& loc.getObjectAtTile(x, b.tileY.Value - 1).ItemId == "130")
+                        {
+                            B = (Chest)loc.getObjectAtTile(x, b.tileY.Value - 1);
+                            Bpairs.Add(b, B);
+                            transferB(b, B);
+                            return;
+                        }
+                        if (loc.isObjectAtTile(x, b.tileY.Value + b.tilesHigh.Value) && loc.getObjectAtTile(x, b.tileY.Value + b.tilesHigh.Value).ItemId == ("130"))
+                        {
+                            B = (Chest)loc.getObjectAtTile(x, b.tileY.Value + b.tilesHigh.Value);
+                            Bpairs.Add(b, B);
+                            transferB(b, B);
+                            return;
+                        }
+                    }
+                    for (int y = b.tileY.Value; y < b.tileY.Value+ b.tilesHigh.Value; y++)
+                    {
+                        
+                        if (loc.isObjectAtTile(b.tileX.Value - 1, y) && loc.getObjectAtTile(b.tileX.Value-1, y).ItemId == "130")
+                        {
+                            B = (Chest)loc.getObjectAtTile(b.tileX.Value - 1, y);
+                            Bpairs.Add(b, B);
+                            transferB(b, B);
+                            return;
+                        }
+                        if (loc.isObjectAtTile(b.tilesWide.Value + b.tileX.Value, y) && loc.getObjectAtTile(b.tilesWide.Value + b.tileX.Value, y).ItemId == ("130"))
+                        {
+                            B = (Chest)loc.getObjectAtTile(b.tilesWide.Value + b.tileX.Value, y);
+                            Bpairs.Add(b, B);
+                            transferB(b, B);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        static void transferB(StardewValley.Buildings.Building build, Chest chst)
+        {
+            if(build is StardewValley.Buildings.FishPond fish)
+            {
+                if(fish.FishCount > 2)
+                {
+                    fish.CatchFish();
+                    chst.addItem(fish.GetFishObject());
+                }
+                if (fish.output.Value != null)
+                {
+                    Item o = fish.output.Value;
+                    fish.output.Value.DeepCloneTo(o);
+                    fish.output.Value = null;
+                    chst.addItem(o);
+                }
+            }
+            
+        }
         // NEW CHANGES
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
         {
@@ -1364,11 +2028,29 @@ namespace chaosaddon
 
 
 
+            //NEW OBJECTS
+
+            Game1.bigCraftableData["130"].DeepCloneTo(dcup);
+            dcup.Description = "Its a Direction chest! It moves items up.";
+            dcup.Name = "Direction Chest (Up)";
+            dcup.DisplayName = "Direction Chest (Up)";
 
 
 
+            Game1.bigCraftableData["130"].DeepCloneTo(dcdown);
+            dcdown.Description = "Its a Direction chest! It moves items down.";
+            dcdown.Name = "Direction Chest (Down)";
+            dcdown.DisplayName = "Direction Chest (Down)";
 
+            Game1.bigCraftableData["130"].DeepCloneTo(dcleft);
+            dcleft.Description = "Its a Direction chest! It moves items left.";
+            dcleft.Name = "Direction Chest (Left)";
+            dcleft.DisplayName = "Direction Chest (Left)";
 
+            Game1.bigCraftableData["130"].DeepCloneTo(dcright);
+            dcright.Description = "Its a Direction chest! It moves items right.";
+            dcright.Name = "Direction Chest (Right)";
+            dcright.DisplayName = "Direction Chest (Right)";
 
 
             // NEW CROPS
@@ -1727,8 +2409,93 @@ namespace chaosaddon
             }
         }
 
+        public static bool GetplacementAction(GameLocation location, int x, int y, StardewValley.Object __instance, ref bool __result)
+        {
 
+            try
+            {
+                Microsoft.Xna.Framework.Vector2 vector = new Microsoft.Xna.Framework.Vector2(x / 64, y / 64);
 
+                if (__instance.ItemId == "DirectionChestUp")
+                {
+                    Chest chest3 = new Chest(true, vector, "DirectionChestUp");
+                    chest3.lidFrameCount.Value = 2;
+                    location.playSound("axe");
+                    location.objects.Add(vector, chest3);
+                    __result = true;
+
+                    return false;
+                }
+                if (__instance.ItemId == "DirectionChestDown")
+                {
+                    Chest chest3 = new Chest(true, vector, "DirectionChestDown");
+                    chest3.lidFrameCount.Value = 2;
+                    location.playSound("axe");
+                    location.objects.Add(vector, chest3);
+                    __result = true;
+
+                    return false;
+                }
+                if (__instance.ItemId == "DirectionChestLeft")
+                {
+                    Chest chest3 = new Chest(true, vector, "DirectionChestLeft");
+                    chest3.lidFrameCount.Value = 2;
+                    location.playSound("axe");
+                    location.objects.Add(vector, chest3);
+                    __result = true;
+
+                    return false;
+                }
+                if (__instance.ItemId == "DirectionChestRight")
+                {
+                    Chest chest3 = new Chest(true, vector, "DirectionChestRight");
+                    chest3.lidFrameCount.Value = 2;
+                    location.playSound("axe");
+                    location.objects.Add(vector, chest3);
+                    __result = true;
+
+                    return false;
+                }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine("Chaosaddon: Ah fuck. Something in the Harmony patch \"GetplacementAction\" went wrong.");
+                return true;
+            }
+        }
+        public static void GetplacementAction2()
+        {
+
+            try
+            {
+                InitiateDirectionChests();
+                InitiateBuildingChests();
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine("Chaosaddon: Ah fuck. Something in the Harmony patch \"GetplacementAction2\" went wrong.");
+
+            }
+        }
+
+        public static void GetperformRemoveAction()
+        {
+            try
+            {
+                InitiateDirectionChests();
+                InitiateBuildingChests();
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine("Ah fuck. Something in the Harmony patch \"GetperformRemoveAction\" went wrong.");
+
+            }
+        }
 
         // REFRENCE
 
@@ -1825,20 +2592,23 @@ Cellar8 86
 
 
         // transpliers. (sigh)
-        /*
+
+
+
+
         public static IEnumerable<CodeInstruction> BuffUpdate_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
             CodeMatcher matcher = new(instructions);
-            
+
             MethodInfo getAppliedID = AccessTools.PropertyGetter(typeof(StardewValley.Buffs.BuffManager), nameof(BuffManager.AppliedBuffIds));
-            MethodInfo getGetCount = AccessTools.PropertyGetter(typeof(Netcode.NetList<string,Netcode.NetString>), nameof(NetList<string,NetString>.Count));
+            MethodInfo getGetCount = AccessTools.PropertyGetter(typeof(Netcode.NetList<string, Netcode.NetString>), nameof(NetList<string, NetString>.Count));
 
             Label l = generator.DefineLabel();
             CodeInstruction d = new CodeInstruction(OpCodes.Nop);
-                d.labels.Add(l);
+            d.labels.Add(l);
 
 
-            
+
 
 
             matcher.MatchStartForward(
@@ -1853,21 +2623,18 @@ Cellar8 86
                     new CodeInstruction(OpCodes.Ldnull),
                     new CodeInstruction(OpCodes.Ceq),
                     new CodeInstruction(OpCodes.Brtrue, l)
-                    
-                    
-                )
-                .Advance(27+3+3)
-                .Insert(d);
-                
-                
 
-          
+
+                )
+                .Advance(27 + 3 + 3)
+                .Insert(d);
+
+
+
+
 
             return matcher.InstructionEnumeration();
         }
-
-        */
-
 
 
 
