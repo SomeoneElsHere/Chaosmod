@@ -60,6 +60,11 @@
             "Action": "Load",
             "Target": "Characters/Pam",
             "FromFile": "XNB files/Characters/Pam.xnb"
+        },
+        {
+            "Action": "Load",
+            "Target": "Tilesheets/DirectionChests",
+            "FromFile": "XNB files/Tilesheets/DirectionChests.xnb"
         }
     ]
 }
