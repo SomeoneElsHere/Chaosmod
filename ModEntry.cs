@@ -41,6 +41,9 @@ using System.Collections.Immutable;
 using StardewValley.GameData.Buildings;
 using StardewValley.GameData.FishPonds;
 using System.Runtime.CompilerServices;
+using System.Reflection.Metadata.Ecma335;
+using System.Collections.Generic;
+using StardewValley.GameData.Locations;
 
 // TO-ADD LIST
 
@@ -70,6 +73,7 @@ namespace chaosaddon
         public Chest rec;
         public StardewValley.Object donorM;
         public StardewValley.Object recM;
+        public List<Chest> Signals;
 
     }
 
@@ -119,7 +123,15 @@ namespace chaosaddon
         BigCraftableData dcdown = new BigCraftableData();
         BigCraftableData dcleft = new BigCraftableData();
         BigCraftableData dcright = new BigCraftableData();
+        BigCraftableData signalC = new BigCraftableData();
 
+        ObjectData signal = new ObjectData();
+
+       //automation stuff
+
+        BigCraftableData OreDestroyer = new BigCraftableData();
+        BigCraftableData WoodDestroyer = new BigCraftableData();
+        BigCraftableData CropHarvester = new BigCraftableData();
 
         //CRAFTING RECIPES
         CraftingRecipe Wood1;
@@ -153,7 +165,7 @@ namespace chaosaddon
 
         static Dictionary<StardewValley.Buildings.Building, Chest> Bpairs = new Dictionary<StardewValley.Buildings.Building, Chest>();
 
-
+        static List<Chest> Destroyers = new List<Chest>();
         public override void Entry(IModHelper helper)
         {
 
@@ -163,10 +175,8 @@ namespace chaosaddon
             helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.GameLoop.TimeChanged += this.OnTimeChanged;
-            helper.Events.GameLoop.DayEnding += this.OnDayEnding;
-            helper.Events.Player.InventoryChanged += this.OnInventoryChanged;
-            helper.Events.Display.Rendered += this.OnRendered;
-            helper.Events.Display.RenderedWorld += this.OnRenderedWorld;
+
+            helper.Events.Display.RenderedActiveMenu += this.OnRenderedActiveMenu;
 
 
             var harmony = new Harmony(this.ModManifest.UniqueID);
@@ -192,13 +202,15 @@ namespace chaosaddon
             postfix: new HarmonyMethod(typeof(ModEntry), nameof(GetperformRemoveAction))
             );
 
+            
+
 
             harmony.Patch(
             original: AccessTools.Method(typeof(BuffManager), nameof(BuffManager.Update)),
             transpiler: new HarmonyMethod(typeof(ModEntry), nameof(BuffUpdate_Transpiler))
             );
 
-
+            
 
 
 
@@ -336,6 +348,8 @@ namespace chaosaddon
                     data.Add("CATBULBSEEDS", CATBULBSEEDS);
 
                     data.Add("BOMBSEEDS", Bombseeds);
+
+                    data.Add("SIGNAL", signal);
                     //*/
                     /// REFRENCE ///
                     ///foreach ((string itemID, ObjectData itemData) in data)
@@ -471,6 +485,11 @@ namespace chaosaddon
                     data.Add("DirectionChestDown", dcdown);
                     data.Add("DirectionChestLeft", dcleft);
                     data.Add("DirectionChestRight", dcright);
+                    data.Add("SignalChest", signalC);
+                    data.Add("CropHarvester", CropHarvester);
+                    data.Add("OreDestroyer", OreDestroyer);
+                    data.Add("WoodDestroyer", WoodDestroyer);
+
                 });
             }
 
@@ -484,6 +503,12 @@ namespace chaosaddon
                     data.Add("DirectionChestDown", "388 50/Home/DirectionChestDown/true/default/");
                     data.Add("DirectionChestLeft", "388 50/Home/DirectionChestLeft/true/default/");
                     data.Add("DirectionChestRight", "388 50/Home/DirectionChestRight/true/default/");
+                    data.Add("SignalChest", "388 50/Home/SignalChest/true/default/");
+                    data.Add("Signal", "388 0/Home/SIGNAL/false/default/");
+
+                    data.Add("CropHarvester", "388 50 335 5/Home/CropHarvester/true/default/");
+                    data.Add("OreDestroyer", "388 50 335 5/Home/OreDestroyer/true/default/");
+                    data.Add("WoodDestroyer", "388 50 335 5/Home/WoodDestroyer/true/default/");
                 });
             }
         }
@@ -492,15 +517,10 @@ namespace chaosaddon
 
         ///DISPLAY
 
-        private void OnRendered(object sender, RenderedEventArgs e)
+        private void OnRenderedActiveMenu(object? sender, RenderedActiveMenuEventArgs e)
         {
 
-
-        }
-
-        private void OnRenderedWorld(object sender, RenderedWorldEventArgs e)
-        {
-
+            
         }
 
 
@@ -784,35 +804,43 @@ namespace chaosaddon
                 if (pair.Value.rec != null && pair.Value.donor != null)
                 {
                     // Console.WriteLine("Rec:" + pair.Value.rec.tileLocation.X + " " + pair.Value.rec.tileLocation.Y);
-                    // Console.WriteLine("Don:" + pair.Value.donor.tileLocation.X + " " + pair.Value.donor.tileLocation.Y);
+                     //Console.WriteLine("Don:" + pair.Value.donor.tileLocation.X + " " + pair.Value.donor.tileLocation.Y);
                     transfer1(pair.Key, pair.Value.donor, pair.Value.rec);
                 }
                 else if (pair.Value.recM != null && pair.Value.donorM != null)
                 {
-                   // Console.WriteLine("Rec:" + pair.Value.recM.tileLocation.X + " " + pair.Value.recM.tileLocation.Y);
-                   // Console.WriteLine("Don:" + pair.Value.donorM.tileLocation.X + " " + pair.Value.donorM.tileLocation.Y);
+                    // Console.WriteLine("Rec:" + pair.Value.recM.tileLocation.X + " " + pair.Value.recM.tileLocation.Y);
+                    // Console.WriteLine("Don:" + pair.Value.donorM.tileLocation.X + " " + pair.Value.donorM.tileLocation.Y);
                     transfer2(pair.Key, pair.Value.donorM, pair.Value.recM);
                 }
                 else if (pair.Value.recM != null && pair.Value.donor != null)
                 {
-                   // Console.WriteLine("Rec:" + pair.Value.recM.tileLocation.X + " " + pair.Value.recM.tileLocation.Y);
-                    //Console.WriteLine("Don:" + pair.Value.donor.tileLocation.X + " " + pair.Value.donor.tileLocation.Y);
+                   //  Console.WriteLine("Rec:" + pair.Value.recM.tileLocation.X + " " + pair.Value.recM.tileLocation.Y);
+                   // Console.WriteLine("Don:" + pair.Value.donor.tileLocation.X + " " + pair.Value.donor.tileLocation.Y);
                     transfer3(pair.Key, pair.Value.donor, pair.Value.recM);
                 }
                 else if (pair.Value.rec != null && pair.Value.donorM != null)
                 {
-                    // Console.WriteLine("Rec:" + pair.Value.rec.tileLocation.X + " " + pair.Value.rec.tileLocation.Y);
+                   // Console.WriteLine("Rec:" + pair.Value.rec.tileLocation.X + " " + pair.Value.rec.tileLocation.Y);
                    // Console.WriteLine("Don:" + pair.Value.donorM.tileLocation.X + " " + pair.Value.donorM.tileLocation.Y);
                     transfer4(pair.Key, pair.Value.donorM, pair.Value.rec);
                 }
 
             }
             //Console.WriteLine("---------");
-            foreach(KeyValuePair<StardewValley.Buildings.Building,Chest> pair in Bpairs)
+            foreach (KeyValuePair<StardewValley.Buildings.Building, Chest> pair in Bpairs)
             {
-                transferB(pair.Key,pair.Value);
+                transferB(pair.Key, pair.Value);
             }
+            //destroyers
+            foreach (Chest d in Destroyers)
+            {
+                if (d.ItemId == "OreDestroyer")
+                {
+                    //OreDestroyerTransfer(d);
+                }
 
+            }
             ///Random events
 
             if (e.NewTime == randomvar_events1) //Early 10 am to 2 pm, default starting time of 12 pm
@@ -1477,72 +1505,70 @@ namespace chaosaddon
 
             foreach (GameLocation loc in Game1.locations)  // for every game location
             {
-                for (y = 0; y < 100; y++)
+                foreach (StardewValley.Object o in loc.Objects.Values)
                 {
-                    for (x = 0; x < 100; x++)
+                    
+                    if (o.ItemId.Contains("DirectionChest")) //if the object in the tile is a direction chest
                     {
-                        if (loc.hasTileAt(x, y, "Back"))
+                       x = (int)o.TileLocation.X;
+                        y = (int)o.TileLocation.Y;  
+                        Chest DC = (Chest)o;
+                        Vector2 upv = new Vector2(x, y + 1);
+                        Vector2 downv = new Vector2(x, y - 1);
+                        Vector2 leftv = new Vector2(x - 1, y);
+                        Vector2 rightv = new Vector2(x + 1, y);
+
+                        // Does the up and down tiles have an object? Or do the left and right tiles have an object?
+                        if ((!loc.CanItemBePlacedHere(upv) && !loc.CanItemBePlacedHere(downv)) || (!loc.CanItemBePlacedHere(leftv) && !loc.CanItemBePlacedHere(rightv)))
                         {
-                            if (loc.getObjectAtTile(x, y) != null && loc.getObjectAtTile(x, y).ItemId.Contains("DirectionChest")) //if the object in the tile is a direction chest
+                            StardewValley.Object donor = null;
+                            StardewValley.Object rec = null;
+
+                            switch (DC.ItemId)  //find the first adjacent chests.
                             {
-                                Chest DC = (Chest)loc.getObjectAtTile(x, y);
-                                Vector2 upv = new Vector2(x, y + 1);
-                                Vector2 downv = new Vector2(x, y - 1);
-                                Vector2 leftv = new Vector2(x - 1, y);
-                                Vector2 rightv = new Vector2(x + 1, y);
-
-                                // Does the up and down tiles have an object? Or do the left and right tiles have an object?
-                                if ((!loc.CanItemBePlacedHere(upv) && !loc.CanItemBePlacedHere(downv)) || (!loc.CanItemBePlacedHere(leftv) && !loc.CanItemBePlacedHere(rightv)))
-                                {
-                                    StardewValley.Object donor = null;
-                                    StardewValley.Object rec = null;
-
-                                    switch (DC.ItemId)  //find the first adjacent chests.
-                                    {
-                                        case "DirectionChestLeft":
-                                            donor = DC.Location.getObjectAtTile((int)x + 1, (int)y);
-                                            rec = DC.Location.getObjectAtTile((int)x - 1, (int)y);
-                                            break;
-                                        case "DirectionChestRight":
-                                            donor = DC.Location.getObjectAtTile((int)x - 1, (int)y);
-                                            rec = DC.Location.getObjectAtTile((int)x + 1, (int)y);
-                                            break;
-                                        case "DirectionChestUp":
-                                            donor = DC.Location.getObjectAtTile((int)x, (int)y + 1);
-                                            rec = DC.Location.getObjectAtTile((int)x, (int)y - 1);
-                                            break;
-                                        case "DirectionChestDown":
-                                            donor = DC.Location.getObjectAtTile((int)x, (int)y - 1);
-                                            rec = DC.Location.getObjectAtTile((int)x, (int)y + 1);
-                                            break;
-
-                                    }
-
-                                    if (donor != null && rec != null && donor.ItemId.Contains("DirectionChest") && rec.ItemId.Contains("DirectionChest")) // if both donor and rec are direction chests, then the given chest is on a path and is not counted.
-                                    {
-                                        continue;
-                                    }
-                                    else
-                                    {
-
-                                        startTransfer(DC, donor, rec); //else, try to start a transfer.
-                                    }
-
-                                }
+                                case "DirectionChestLeft":
+                                    donor = DC.Location.getObjectAtTile((int)x + 1, (int)y);
+                                    rec = DC.Location.getObjectAtTile((int)x - 1, (int)y);
+                                    break;
+                                case "DirectionChestRight":
+                                    donor = DC.Location.getObjectAtTile((int)x - 1, (int)y);
+                                    rec = DC.Location.getObjectAtTile((int)x + 1, (int)y);
+                                    break;
+                                case "DirectionChestUp":
+                                    donor = DC.Location.getObjectAtTile((int)x, (int)y + 1);
+                                    rec = DC.Location.getObjectAtTile((int)x, (int)y - 1);
+                                    break;
+                                case "DirectionChestDown":
+                                    donor = DC.Location.getObjectAtTile((int)x, (int)y - 1);
+                                    rec = DC.Location.getObjectAtTile((int)x, (int)y + 1);
+                                    break;
 
                             }
 
-                        }
-                    }
+                            if (donor != null && rec != null && donor.ItemId.Contains("DirectionChest") && rec.ItemId.Contains("DirectionChest")) // if both donor and rec are direction chests, then the given chest is on a path and is not counted.
+                            {
+                                continue;
+                            }
+                            else
+                            {
 
+                                startTransfer(DC, donor, rec); //else, try to start a transfer.
+                            }
+
+                        }
+
+                    }
                 }
             }
+
+
         }
         static public void startTransfer(Chest DC, StardewValley.Object donor, StardewValley.Object rec)
         {
             int uhoh = 0;
             float x = DC.TileLocation.X;
             float y = DC.TileLocation.Y;
+            List<Chest> list = new List<Chest>();
 
             if (rec == null || donor == null)
             {
@@ -1550,45 +1576,194 @@ namespace chaosaddon
             }
 
 
-            try
+            switch (DC.ItemId)
             {
+                case "DirectionChestLeft":
+
+                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x, (int)y + 1)) && rec.Location.isTileOnMap(new Vector2((int)x, (int)y + 1)))
+                    {
+                        if (rec.Location.getObjectAtTile((int)x, (int)y + 1).ItemId == "SignalChest")
+                        {
+                            list.Add(((Chest)donor.Location.getObjectAtTile((int)x, (int)y + 1)));
+                        }
+                    }
+                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x, (int)y - 1)) && rec.Location.isTileOnMap(new Vector2((int)x, (int)y - 1)))
+                    {
+                        if (rec.Location.getObjectAtTile((int)x, (int)y - 1).ItemId == "SignalChest")
+                        {
+                            list.Add(((Chest)rec.Location.getObjectAtTile((int)x, (int)y - 1)));
+                        }
+                    }
+                    break;
+                case "DirectionChestRight":
+
+                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x, (int)y + 1)) && rec.Location.isTileOnMap(new Vector2((int)x, (int)y + 1)))
+                    {
+                        if (rec.Location.getObjectAtTile((int)x, (int)y + 1).ItemId == "SignalChest")
+                        {
+                            list.Add(((Chest)donor.Location.getObjectAtTile((int)x, (int)y + 1)));
+                        }
+                    }
+                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x, (int)y - 1)) && rec.Location.isTileOnMap(new Vector2((int)x, (int)y - 1)))
+                    {
+                        if (rec.Location.getObjectAtTile((int)x, (int)y - 1).ItemId == "SignalChest")
+                        {
+                            list.Add(((Chest)rec.Location.getObjectAtTile((int)x, (int)y - 1)));
+                        }
+                    }
+                    break;
+                case "DirectionChestUp":
+
+                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x - 1, (int)y)) && rec.Location.isTileOnMap(new Vector2((int)x - 1, (int)y)))
+                    {
+                        if (rec.Location.getObjectAtTile((int)x - 1, (int)y).ItemId == "SignalChest")
+                        {
+                            list.Add(((Chest)donor.Location.getObjectAtTile((int)x - 1, (int)y)));
+                        }
+                    }
+                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x + 1, (int)y)) && rec.Location.isTileOnMap(new Vector2((int)x + 1, (int)y)))
+                    {
+                        if (rec.Location.getObjectAtTile((int)x + 1, (int)y).ItemId == "SignalChest")
+                        {
+                            list.Add(((Chest)rec.Location.getObjectAtTile((int)x + 1, (int)y)));
+                        }
+                    }
+                    break;
+                case "DirectionChestDown":
+
+                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x - 1, (int)y)) && rec.Location.isTileOnMap(new Vector2((int)x   - 1, (int)y)))
+                    {
+                        if (rec.Location.getObjectAtTile((int)x - 1, (int)y).ItemId == "SignalChest")
+                        {
+                            list.Add(((Chest)donor.Location.getObjectAtTile((int)x - 1, (int)y)));
+                        }
+                    }
+                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x + 1, (int)y)) && rec.Location.isTileOnMap(new Vector2((int)x + 1, (int)y)))
+                    {
+                        if (rec.Location.getObjectAtTile((int)x + 1, (int)y).ItemId == "SignalChest")
+                        {
+                            list.Add(((Chest)rec.Location.getObjectAtTile((int)x + 1, (int)y)));
+                        }
+                    }
+                    break;
+
+            }
+
+                    try
+            {
+                
                 while (donor.ItemId.Contains("DirectionChest"))  //find the parent donor obj if it exists
                 {
                     float x1 = donor.TileLocation.X;
                     float y1 = donor.tileLocation.Y;
 
-
+                    Console.WriteLine(donor.Location.isTileOnMap(new Vector2((int)x1 - 1, (int)y1)));
                     switch (donor.ItemId)
                     {
+
                         case "DirectionChestLeft":
-                            if (donor.Location.CanItemBePlacedHere(new Vector2((int)x1 + 1, (int)y1)))
+                            if (donor.Location.CanItemBePlacedHere(new Vector2((int)x1 + 1, (int)y1)) || !donor.Location.isTileOnMap(new Vector2((int)x1 + 1, (int)y1)))
                             {
-                                return;  //return if oob
+                                return;  // if oob or no chest is there
+                            }
+                            
+                            donor = donor.Location.getObjectAtTile((int)x1 + 1, (int)y1);
+                    
+
+                            if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1+1)) && donor.Location.isTileOnMap(new Vector2((int)x1, (int)y1+1)))
+                            {
+                                  if(donor.Location.getObjectAtTile((int)x1, (int)y1+1).ItemId == "SignalChest")
+                                  {
+                                    list.Add(((Chest)donor.Location.getObjectAtTile((int)x1, (int)y1 + 1)));
+                                  }
+                            }
+                            if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 - 1)) && donor.Location.isTileOnMap(new Vector2((int)x1, (int)y1 - 1)))
+                            {
+                                if (donor.Location.getObjectAtTile((int)x1, (int)y1 - 1).ItemId == "SignalChest")
+                                {
+                                    list.Add(((Chest)donor.Location.getObjectAtTile((int)x1, (int)y1 - 1)));
+                                }
                             }
 
-                            donor = donor.Location.getObjectAtTile((int)x1 + 1, (int)y1);
+
                             break;
                         case "DirectionChestRight":
-                            if (donor.Location.CanItemBePlacedHere(new Vector2((int)x1 - 1, (int)y1)))
+                            if (donor.Location.CanItemBePlacedHere(new Vector2((int)x1 - 1, (int)y1)) || !donor.Location.isTileOnMap(new Vector2((int)x1 - 1, (int)y1)))
                             {
                                 return;
                             }
+
                             donor = donor.Location.getObjectAtTile((int)x1 - 1, (int)y1);
+
+             
+
+                            if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 + 1)) && donor.Location.isTileOnMap(new Vector2((int)x1, (int)y1 + 1)))
+                            {
+                                if (donor.Location.getObjectAtTile((int)x1, (int)y1 + 1).ItemId == "SignalChest")
+                                {
+                                    list.Add(((Chest)donor.Location.getObjectAtTile((int)x1, (int)y1 + 1)));
+                                }
+                            }
+                            if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 - 1)) && donor.Location.isTileOnMap(new Vector2((int)x1, (int)y1 - 1)))
+                            {
+                                if (donor.Location.getObjectAtTile((int)x1, (int)y1 - 1).ItemId == "SignalChest")
+                                {
+                                    list.Add(((Chest)donor.Location.getObjectAtTile((int)x1, (int)y1 - 1)));
+                                }
+                            }
                             break;
                         case "DirectionChestUp":
-                            if (donor.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 + 1)))
+                            if (donor.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 + 1)) || !donor.Location.isTileOnMap(new Vector2((int)x1, (int)y1 + 1)))
                             {
                                 return;
                             }
+                            
+
                             donor = donor.Location.getObjectAtTile((int)x1, (int)y1 + 1);
+
+
+                            
+
+                            if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1 + 1, (int)y1)) && donor.Location.isTileOnMap(new Vector2((int)x1 + 1, (int)y1)))
+                            {
+                                if (donor.Location.getObjectAtTile((int)x1 + 1, (int)y1).ItemId == "SignalChest")
+                                {
+                                    list.Add(((Chest)donor.Location.getObjectAtTile((int)x1 + 1, (int)y1)));
+                                }
+                            }
+                            if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1 - 1, (int)y1)) && donor.Location.isTileOnMap(new Vector2((int)x1 - 1, (int)y1)))
+                            {
+                                if (donor.Location.getObjectAtTile((int)x1 - 1, (int)y1).ItemId == "SignalChest")
+                                {
+                                    list.Add(((Chest)donor.Location.getObjectAtTile((int)x1 - 1, (int)y1)));
+                                }
+                            }
 
                             break;
                         case "DirectionChestDown":
-                            if (donor.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 - 1)))
+                            if (donor.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 - 1)) || !donor.Location.isTileOnMap(new Vector2((int)x1, (int)y1 - 1)))
                             {
                                 return;
                             }
+                            
                             donor = donor.Location.getObjectAtTile((int)x1, (int)y1 - 1);
+
+                            
+
+                            if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1 + 1, (int)y1)) && donor.Location.isTileOnMap(new Vector2((int)x1 + 1, (int)y1)))
+                            {
+                                if (donor.Location.getObjectAtTile((int)x1 + 1, (int)y1).ItemId == "SignalChest")
+                                {
+                                    list.Add(((Chest)donor.Location.getObjectAtTile((int)x1 + 1, (int)y1)));
+                                }
+                            }
+                            if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1 - 1, (int)y1)) && donor.Location.isTileOnMap(new Vector2((int)x1 - 1, (int)y1)))
+                            {
+                                if (donor.Location.getObjectAtTile((int)x1 - 1, (int)y1).ItemId == "SignalChest")
+                                {
+                                    list.Add(((Chest)donor.Location.getObjectAtTile((int)x1 - 1, (int)y1)));
+                                }
+                            }
                             break;
 
                     }
@@ -1615,36 +1790,110 @@ namespace chaosaddon
                 {
                     float x1 = rec.TileLocation.X;
                     float y1 = rec.tileLocation.Y;
-
+                    
                     switch (rec.ItemId)
                     {
                         case "DirectionChestLeft":
-                            if (rec.Location.CanItemBePlacedHere(new Vector2((int)x1 - 1, (int)y1)))
+                            if (rec.Location.CanItemBePlacedHere(new Vector2((int)x1 - 1, (int)y1)) || !rec.Location.isTileOnMap(new Vector2((int)x1 - 1, (int)y1)))
                             {
                                 return;
                             }
+                            
                             rec = rec.Location.getObjectAtTile((int)x1 - 1, (int)y1);
+
+                          
+
+                            if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 + 1)) && rec.Location.isTileOnMap(new Vector2((int)x1, (int)y1 + 1)))
+                            {
+                                if (rec.Location.getObjectAtTile((int)x1, (int)y1 + 1).ItemId == "SignalChest")
+                                {
+                                    list.Add(((Chest)donor.Location.getObjectAtTile((int)x1, (int)y1 + 1)));
+                                }
+                            }
+                            if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 - 1)) && rec.Location.isTileOnMap(new Vector2((int)x1, (int)y1 - 1)))
+                            {
+                                if (rec.Location.getObjectAtTile((int)x1, (int)y1 - 1).ItemId == "SignalChest")
+                                {
+                                    list.Add(((Chest)rec.Location.getObjectAtTile((int)x1, (int)y1 - 1)));
+                                }
+                            }
                             break;
                         case "DirectionChestRight":
-                            if (rec.Location.CanItemBePlacedHere(new Vector2((int)x1 + 1, (int)y1)))
+                            if (rec.Location.CanItemBePlacedHere(new Vector2((int)x1 + 1, (int)y1)) || !rec.Location.isTileOnMap(new Vector2((int)x1 + 1, (int)y1)))
                             {
                                 return;
                             }
+                            
                             rec = rec.Location.getObjectAtTile((int)x1 + 1, (int)y1);
+
+                           
+
+                            if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 + 1)) && rec.Location.isTileOnMap(new Vector2((int)x1, (int)y1 + 1)))
+                            {
+                                if (rec.Location.getObjectAtTile((int)x1, (int)y1 + 1).ItemId == "SignalChest")
+                                {
+                                    list.Add(((Chest)donor.Location.getObjectAtTile((int)x1, (int)y1 + 1)));
+                                }
+                            }
+                            if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 - 1)) && rec.Location.isTileOnMap(new Vector2((int)x1, (int)y1 - 1)))
+                            {
+                                if (rec.Location.getObjectAtTile((int)x1, (int)y1 - 1).ItemId == "SignalChest")
+                                {
+                                    list.Add(((Chest)rec.Location.getObjectAtTile((int)x1, (int)y1 - 1)));
+                                }
+                            }
                             break;
                         case "DirectionChestUp":
-                            if (rec.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 - 1)))
+                            if (rec.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 - 1)) || !rec.Location.isTileOnMap(new Vector2((int)x1, (int)y1 - 1)))
                             {
                                 return;
                             }
+                            
                             rec = rec.Location.getObjectAtTile((int)x1, (int)y1 - 1);
+
+                            
+
+                            
+
+                            if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1 - 1, (int)y1)) && rec.Location.isTileOnMap(new Vector2((int)x1 - 1, (int)y1)))
+                            {
+                                if (rec.Location.getObjectAtTile((int)x1 -1, (int)y1).ItemId == "SignalChest")
+                                {
+                                    list.Add(((Chest)donor.Location.getObjectAtTile((int)x1 - 1, (int)y1)));
+                                }
+                            }
+                            if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1 + 1, (int)y1)) && rec.Location.isTileOnMap(new Vector2((int)x1 + 1, (int)y1)))
+                            {
+                                if (rec.Location.getObjectAtTile((int)x1 + 1, (int)y1).ItemId == "SignalChest")
+                                {
+                                    list.Add(((Chest)rec.Location.getObjectAtTile((int)x1 + 1, (int)y1)));
+                                }
+                            }
                             break;
                         case "DirectionChestDown":
-                            if (rec.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 + 1)))
+                            if (rec.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 + 1)) || !rec.Location.isTileOnMap(new Vector2((int)x1, (int)y1 + 1)))
                             {
                                 return;
                             }
+                            
                             rec = rec.Location.getObjectAtTile((int)x1, (int)y1 + 1);
+
+                           
+
+                            if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1 - 1, (int)y1)) && rec.Location.isTileOnMap(new Vector2((int)x1 - 1, (int)y1)))
+                            {
+                                if (rec.Location.getObjectAtTile((int)x1 - 1, (int)y1).ItemId == "SignalChest")
+                                {
+                                    list.Add(((Chest)donor.Location.getObjectAtTile((int)x1 - 1, (int)y1)));
+                                }
+                            }
+                            if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1 + 1, (int)y1)) && rec.Location.isTileOnMap(new Vector2((int)x1 + 1, (int)y1)))
+                            {
+                                if (rec.Location.getObjectAtTile((int)x1 + 1, (int)y1).ItemId == "SignalChest")
+                                {
+                                    list.Add(((Chest)rec.Location.getObjectAtTile((int)x1 + 1, (int)y1)));
+                                }
+                            }
                             break;
 
                     }
@@ -1667,13 +1916,31 @@ namespace chaosaddon
                 return;
             }
 
-            
+           
+
+           
+
+
+            foreach (Chest c in list)  // removes duplicates in list
+            {
+                Predicate<Chest> pre = delegate (Chest a) { return c.TileLocation == a.TileLocation; };
+                if (list.FindAll(pre).Count >1)
+                {
+                    list.Remove(c);
+                }
+            }
+
+           
+
+
+
 
             if (rec as Chest != null && donor as Chest != null)
             {
                 DCpair d = new DCpair();
                 d.rec = (Chest)rec;
                 d.donor = (Chest)donor;
+                d.Signals = list;
                 DCpairs.Add(DC, d);
 
                 transfer1(DC, ((Chest)donor), ((Chest)rec)); // transfer items
@@ -1684,6 +1951,7 @@ namespace chaosaddon
                 DCpair d = new DCpair();
                 d.recM = rec;
                 d.donorM = donor;
+                d.Signals = list;
                 DCpairs.Add(DC, d);
 
                 transfer2(DC, donor, rec);
@@ -1693,6 +1961,7 @@ namespace chaosaddon
                 DCpair d = new DCpair();
                 d.recM = rec;
                 d.donor = (Chest)donor;
+                d.Signals = list;
                 DCpairs.Add(DC, d);
 
                 transfer3(DC, ((Chest)donor), (rec));
@@ -1703,6 +1972,7 @@ namespace chaosaddon
                 DCpair d = new DCpair();
                 d.rec = (Chest)rec;
                 d.donorM = donor;
+                d.Signals = list;
                 DCpairs.Add(DC, d);
 
                 transfer4(DC, donor, ((Chest)rec));
@@ -1710,8 +1980,46 @@ namespace chaosaddon
 
         }
 
+
+        static bool checkForSignal(Chest DC)
+        {
+            if (DCpairs[DC].Signals.Count == 0)
+            {
+                return true;
+            }
+
+            foreach (Chest signal in DCpairs[DC].Signals)
+            {
+                bool hasSignal = false;
+
+                //Console.WriteLine(signal.TileLocation);
+                foreach (Item i in signal.Items)
+                {
+                    //Console.WriteLine("Looking for signal at "+i.itemId);
+                    if (i.ItemId == "SIGNAL")
+                    {
+                        hasSignal = true;
+                    }
+                }
+                if(!hasSignal)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
         static void transfer1(Chest DC, Chest d, Chest r) //object transfer based on 2 chests
         {
+
+            
+           if(checkForSignal(DC) == false)  // if there is a signal chest with no signals, return.
+            {
+                return;
+            }
+
+
+
+
             foreach (StardewValley.Object obj in d.Items)
             {
 
@@ -1777,8 +2085,8 @@ namespace chaosaddon
                                 r.Items.Add(obj2);
                             }
                         }
-                        
-                        
+
+
                     }
                 }
 
@@ -1788,6 +2096,12 @@ namespace chaosaddon
 
         static void transfer2(Chest DC, StardewValley.Object d, StardewValley.Object r)
         {
+
+            if (checkForSignal(DC) == false)
+            {
+                return;
+            }
+
             Farmer f = new Farmer();
             f.Items.Add(d.heldObject.Value);
             if (d.heldObject.Value != null && d.MinutesUntilReady == 0 && r.MinutesUntilReady == 0 && d.readyForHarvest.Value && !r.readyForHarvest.Value && r.heldObject.Value == null)
@@ -1836,69 +2150,83 @@ namespace chaosaddon
 
         static void transfer3(Chest DC, Chest d, StardewValley.Object r)
         {
+
+            if (checkForSignal(DC) == false)
+            {
+                return;
+            }
+
             Farmer f = new Farmer();
             f.Items.AddRange(d.Items);
             foreach (StardewValley.Object o in d.Items)
             {
-                StardewValley.Object DCo = (StardewValley.Object)DC.Items[0];
-                if (o == null || DCo == null || r.heldObject == null)
+                foreach (StardewValley.Object DCo in DC.Items)
                 {
-                    return;
-                }
 
-
-                if (o.ItemId == DCo.ItemId && !r.readyForHarvest.Value && r.MinutesUntilReady == 0 && r.heldObject.Value == null)
-                {
-                    MachineOutputRule output = null;
-                    MachineOutputTriggerRule outputrule = null;
-                    MachineOutputRule ignorecount = null;
-                    MachineOutputTriggerRule ignoreoutputrule = null;
-                    if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.None, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
+                    if (o == null || DCo == null || r.heldObject == null)
                     {
-                        if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.DayUpdate, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
-                        {
-                            if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.ItemPlacedInMachine, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
-                            {
-                                if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.MachinePutDown, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
-                                {
-                                    if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.OutputCollected, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
-                                    {
+                        continue;
+                    }
 
-                                        return;
+
+                    if (o.ItemId == DCo.ItemId && !r.readyForHarvest.Value && r.MinutesUntilReady == 0 && r.heldObject.Value == null)
+                    {
+                        MachineOutputRule output = null;
+                        MachineOutputTriggerRule outputrule = null;
+                        MachineOutputRule ignorecount = null;
+                        MachineOutputTriggerRule ignoreoutputrule = null;
+                        if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.None, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
+                        {
+                            if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.DayUpdate, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
+                            {
+                                if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.ItemPlacedInMachine, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
+                                {
+                                    if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.MachinePutDown, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
+                                    {
+                                        if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.OutputCollected, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
+                                        {
+
+                                            continue;
+                                        }
                                     }
                                 }
                             }
+
                         }
 
-                    }
+
+                        if (o.Stack < output.Triggers[0].RequiredCount)
+                        {
+                            continue;
+                        }
 
 
-                    if (o.Stack < output.Triggers[0].RequiredCount)
-                    {
+
+
+                        r.PlaceInMachine(r.GetMachineData(), o, false, f);
+
+                        d.Items.Reduce(o, output.Triggers[0].RequiredCount);
+                        f.Items.Reduce(o, output.Triggers[0].RequiredCount);
+
                         return;
                     }
+                    else if (r.heldObject.Value == null && r.MinutesUntilReady != 0)
+                    {
+                        r.MinutesUntilReady = 0;
 
-
-
-
-                    r.PlaceInMachine(r.GetMachineData(), o, false, f);
-
-                    d.Items.Reduce(o, output.Triggers[0].RequiredCount);
-                    f.Items.Reduce(o, output.Triggers[0].RequiredCount);
-
-                    return;
+                    }
                 }
-                else if (r.heldObject.Value == null && r.MinutesUntilReady != 0)
-                {
-                    r.MinutesUntilReady = 0;
-
-                }
-
             }
 
         }
         static void transfer4(Chest DC, StardewValley.Object d, Chest r)
         {
+
+            if (checkForSignal(DC) == false)
+            {
+                return;
+            }
+
             foreach (StardewValley.Object DCo in DC.Items)
             {
 
@@ -1939,6 +2267,8 @@ namespace chaosaddon
         }
 
 
+
+
         static void InitiateBuildingChests()
         {
             Bpairs = new Dictionary<StardewValley.Buildings.Building, Chest>();
@@ -1946,13 +2276,13 @@ namespace chaosaddon
             foreach (GameLocation loc in Game1.locations)  // for every game location
             {
                 Chest B;
-                
-                foreach(StardewValley.Buildings.Building b in loc.buildings) //search the surrounding tiles for a chest
+
+                foreach (StardewValley.Buildings.Building b in loc.buildings) //search the surrounding tiles for a chest
                 {
-                    for (int x = b.tileX.Value; x<b.tilesWide.Value+ b.tileX.Value; x++)
+                    for (int x = b.tileX.Value; x < b.tilesWide.Value + b.tileX.Value; x++)
                     {
-                       
-                        if (loc.isObjectAtTile(x, b.tileY.Value - 1)&& loc.getObjectAtTile(x, b.tileY.Value - 1).ItemId == "130")
+
+                        if (loc.isObjectAtTile(x, b.tileY.Value - 1) && loc.getObjectAtTile(x, b.tileY.Value - 1).ItemId == "130")
                         {
                             B = (Chest)loc.getObjectAtTile(x, b.tileY.Value - 1);
                             Bpairs.Add(b, B);
@@ -1967,10 +2297,10 @@ namespace chaosaddon
                             return;
                         }
                     }
-                    for (int y = b.tileY.Value; y < b.tileY.Value+ b.tilesHigh.Value; y++)
+                    for (int y = b.tileY.Value; y < b.tileY.Value + b.tilesHigh.Value; y++)
                     {
-                        
-                        if (loc.isObjectAtTile(b.tileX.Value - 1, y) && loc.getObjectAtTile(b.tileX.Value-1, y).ItemId == "130")
+
+                        if (loc.isObjectAtTile(b.tileX.Value - 1, y) && loc.getObjectAtTile(b.tileX.Value - 1, y).ItemId == "130")
                         {
                             B = (Chest)loc.getObjectAtTile(b.tileX.Value - 1, y);
                             Bpairs.Add(b, B);
@@ -1991,9 +2321,9 @@ namespace chaosaddon
 
         static void transferB(StardewValley.Buildings.Building build, Chest chst)
         {
-            if(build is StardewValley.Buildings.FishPond fish)
+            if (build is StardewValley.Buildings.FishPond fish)
             {
-                if(fish.FishCount > 2)
+                if (fish.FishCount > 2)
                 {
                     fish.CatchFish();
                     chst.addItem(fish.GetFishObject());
@@ -2006,8 +2336,247 @@ namespace chaosaddon
                     chst.addItem(o);
                 }
             }
-            
+
         }
+
+        /*
+        static void InitiateDestroyers()
+        {
+            Destroyers.Clear();
+            foreach(GameLocation loc in Game1.locations)
+            {
+                foreach(StardewValley.Object obj in loc.Objects.Values)
+                {
+                    if(obj.ItemId == "CropHarvester" || obj.ItemId == "OreDestroyer" || obj.ItemId == "WoodDestroyer")
+                    {
+                        Destroyers.Add((Chest)obj);
+                    }
+
+                }
+            }
+
+            foreach(Chest d in Destroyers)
+            {
+                if (d.ItemId == "OreDestroyer")
+                    OreDestroyerTransfer(d);
+            }
+        }
+
+
+        
+        static void OreDestroyerTransfer(Chest ore)
+        {
+            float x = ore.tileLocation.X-2;
+            float y = ore.tileLocation.Y - 2;
+
+            for(float y1 = y; y1<y+5; y1++)
+            {
+                for(float x1 = x; x1<x+5; x1++)
+                {
+                    if(ore.Location.hasTileAt((int)x1,(int)y1,"Back") && ore.Location.getObjectAtTile((int)x1, (int)y1) != null)
+                    {
+                        StardewValley.Object o = ore.Location.getObjectAtTile((int)x1, (int)y1);
+                       if( o.isDebrisOrForage() && ore.Items.CountItemStacks() < 32)
+                        {
+                           switch(o.ItemId)
+                            {
+                                case "2":
+                                    if (ore.Items.ContainsId("72"))
+                                    {
+                                        ore.Items.GetById("72").First().Stack++;
+                                    }
+                                    else
+                                    {
+                                        ore.addItem(new StardewValley.Object("72", 1));
+                                    }
+                                    o.performRemoveAction();
+                                break;
+                                case "4":
+                                    if (ore.Items.ContainsId("64"))
+                                    {
+                                        ore.Items.GetById("64").First().Stack++;
+                                    }
+                                    else
+                                    {
+                                        ore.addItem(new StardewValley.Object("64", 1));
+                                    }
+                                    o.performRemoveAction();
+                                    break;
+                                case "6":
+                                    if (ore.Items.ContainsId("70"))
+                                    {
+                                        ore.Items.GetById("70").First().Stack++;
+                                    }
+                                    else
+                                    {
+                                        ore.addItem(new StardewValley.Object("70", 1));
+                                    }
+                                    o.performRemoveAction();
+                                    break;
+                                case "8":
+                                    if (ore.Items.ContainsId("66"))
+                                    {
+                                        ore.Items.GetById("66").First().Stack++;
+                                    }
+                                    else
+                                    {
+                                        ore.addItem(new StardewValley.Object("66", 1));
+                                    }
+                                    o.performRemoveAction();
+                                    break;
+                                case "10":
+                                    if (ore.Items.ContainsId("68"))
+                                    {
+                                        ore.Items.GetById("68").First().Stack++;
+                                    }
+                                    else
+                                    {
+                                        ore.addItem(new StardewValley.Object("68", 1));
+                                    }
+                                    o.performRemoveAction();
+                                    break;
+                                case "12":
+                                    if (ore.Items.ContainsId("60"))
+                                    {
+                                        ore.Items.GetById("60").First().Stack++;
+                                    }
+                                    else
+                                    {
+                                        ore.addItem(new StardewValley.Object("60", 1));
+                                    }
+                                    o.performRemoveAction();
+                                    break;
+                                case "14":
+                                    if (ore.Items.ContainsId("62"))
+                                    {
+                                        ore.Items.GetById("62").First().Stack++;
+                                    }
+                                    else
+                                    {
+                                        ore.addItem(new StardewValley.Object("62", 1));
+                                    }
+                                    o.performRemoveAction();
+                                    break;
+                                case "75":
+                                    if (ore.Items.ContainsId("535"))
+                                    {
+                                        ore.Items.GetById("535").First().Stack++;
+                                    }
+                                    else
+                                    {
+                                        ore.addItem(new StardewValley.Object("535", 1));
+                                    }
+                                    o.performRemoveAction();
+                                    break;
+                                case "76":
+                                    if (ore.Items.ContainsId("536"))
+                                    {
+                                        ore.Items.GetById("536").First().Stack++;
+                                    }
+                                    else
+                                    {
+                                        ore.addItem(new StardewValley.Object("536", 1));
+                                    }
+                                    o.performRemoveAction();
+                                    break;
+                                case "77":
+                                    if (ore.Items.ContainsId("537"))
+                                    {
+                                        ore.Items.GetById("537").First().Stack++;
+                                    }
+                                    else
+                                    {
+                                        ore.addItem(new StardewValley.Object("537", 1));
+                                    }
+                                    o.performRemoveAction();
+                                    break;
+                                case "751":
+                                    if (ore.Items.ContainsId("378"))
+                                    {
+                                        ore.Items.GetById("378").First().Stack += 3;
+                                    }
+                                    else
+                                    {
+                                        ore.addItem(new StardewValley.Object("378", 3));
+                                    }
+                                    o.performRemoveAction();
+                                    break;
+                                case "290":
+                                    if (ore.Items.ContainsId("380"))
+                                    {
+                                        ore.Items.GetById("380").First().Stack += 3;
+                                    }
+                                    else
+                                    {
+                                        ore.addItem(new StardewValley.Object("380", 3));
+                                    }
+                                    o.performRemoveAction();
+                                    break;
+                                case "764":
+                                    if (ore.Items.ContainsId("384"))
+                                    {
+                                        ore.Items.GetById("384").First().Stack += 3;
+                                    }
+                                    else
+                                    {
+                                        ore.addItem(new StardewValley.Object("384", 3));
+                                    }
+                                    o.performRemoveAction();
+                                    break;
+                                case "765":
+                                    if (ore.Items.ContainsId("386"))
+                                    {
+                                        ore.Items.GetById("386").First().Stack += 3;
+                                    }
+                                    else
+                                    {
+                                        ore.addItem(new StardewValley.Object("386", 3));
+                                    }
+                                    o.performRemoveAction();
+                                    break;
+                                case "46":
+                                    if (ore.Items.ContainsId("74"))
+                                    {
+                                        ore.Items.GetById("74").First().Stack++;
+                                    }
+                                    else
+                                    {
+                                        ore.addItem(new StardewValley.Object("74", 1));
+                                    }
+                                    o.performRemoveAction();
+                                    break;
+                            }
+
+                            if(o.ItemId == "32" || o.ItemId == "34" || o.ItemId == "36" || o.ItemId == "34" || o.ItemId == "36" || o.ItemId == "38" || o.ItemId == "40" || o.ItemId == "42" || o.ItemId == "343" || o.ItemId == "450" || o.ItemId == "668" || o.ItemId == "670" || o.ItemId == "760" || o.ItemId == "762")
+                            {
+                                if (ore.Items.ContainsId("390"))
+                                {
+                                    ore.Items.GetById("390").First().Stack += 5;
+                                }
+                                else
+                                {
+                                    ore.addItem(new StardewValley.Object("390", 5));
+                                }
+                                if (new Random().Next(0, 20) > 10)
+                                {
+                                    if (ore.Items.ContainsId("382"))
+                                    {
+                                        ore.Items.GetById("382").First().Stack += 3;
+                                    }
+                                    else
+                                    {
+                                        ore.addItem(new StardewValley.Object("382", 3));
+                                    }
+                                }
+                                o.performRemoveAction();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        */
         // NEW CHANGES
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
         {
@@ -2030,11 +2599,13 @@ namespace chaosaddon
 
             //NEW OBJECTS
 
+            //Direction chests
+
             Game1.bigCraftableData["130"].DeepCloneTo(dcup);
             dcup.Description = "Its a Direction chest! It moves items up.";
             dcup.Name = "Direction Chest (Up)";
             dcup.DisplayName = "Direction Chest (Up)";
-
+            
 
 
             Game1.bigCraftableData["130"].DeepCloneTo(dcdown);
@@ -2052,6 +2623,36 @@ namespace chaosaddon
             dcright.Name = "Direction Chest (Right)";
             dcright.DisplayName = "Direction Chest (Right)";
 
+            Game1.bigCraftableData["130"].DeepCloneTo(signalC);
+            signalC.Description = "Its a Signal chest! It stops direction chests if it doesnt have a signal.";
+            signalC.Name = "Signal chest";
+            signalC.DisplayName = "Signal chest";
+
+            Game1.objectData["64"].DeepCloneTo(signal);
+            signal.Description = "A Signal";
+            signal.Name = "Signal";
+            signal.DisplayName = "Signal";
+            signal.Price = 0;
+
+
+
+            //Destroyers
+
+
+            Game1.bigCraftableData["130"].DeepCloneTo(OreDestroyer);
+            OreDestroyer.Description = "Its an Ore Destroyer! It destroys rocks in a 5 by 5 area.";
+            OreDestroyer.Name = "Ore Destroyer";
+            OreDestroyer.DisplayName = "Ore Destroyer";
+
+            Game1.bigCraftableData["130"].DeepCloneTo(WoodDestroyer);
+            WoodDestroyer.Description = "Its a Wood Destroyer! It destroys and plants trees in a 5 by 5 area.";
+            WoodDestroyer.Name = "Wood Destroyer";
+            WoodDestroyer.DisplayName = "Wood Destroyer";
+
+            Game1.bigCraftableData["130"].DeepCloneTo(CropHarvester);
+            CropHarvester.Description = "Its a Crop Harvester! It harvests crops in a 5 by 5 area.";
+            CropHarvester.Name = "Crop Harvester";
+            CropHarvester.DisplayName = "Crop Harvester";
 
             // NEW CROPS
 
@@ -2456,6 +3057,46 @@ namespace chaosaddon
 
                     return false;
                 }
+                if (__instance.ItemId == "SignalChest")
+                {
+                    Chest chest3 = new Chest(true, vector, "SignalChest");
+                    chest3.lidFrameCount.Value = 2;
+                    location.playSound("axe");
+                    location.objects.Add(vector, chest3);
+                    __result = true;
+
+                    return false;
+                }
+                if (__instance.ItemId == "OreDestroyer")
+                {
+                    Chest chest3 = new Chest(true, vector, "OreDestroyer");
+                    chest3.lidFrameCount.Value = 2;
+                    location.playSound("axe");
+                    location.objects.Add(vector, chest3);
+                    __result = true;
+
+                    return false;
+                }
+                if (__instance.ItemId == "WoodDestroyer")
+                {
+                    Chest chest3 = new Chest(true, vector, "WoodDestroyer");
+                    chest3.lidFrameCount.Value = 2;
+                    location.playSound("axe");
+                    location.objects.Add(vector, chest3);
+                    __result = true;
+
+                    return false;
+                }
+                if (__instance.ItemId == "CropHarvester")
+                {
+                    Chest chest3 = new Chest(true, vector, "CropHarvester");
+                    chest3.lidFrameCount.Value = 2;
+                    location.playSound("axe");
+                    location.objects.Add(vector, chest3);
+                    __result = true;
+
+                    return false;
+                }
 
                 return true;
             }
@@ -2473,6 +3114,7 @@ namespace chaosaddon
             {
                 InitiateDirectionChests();
                 InitiateBuildingChests();
+                //InitiateDestroyers();
             }
             catch (Exception e)
             {
@@ -2488,6 +3130,7 @@ namespace chaosaddon
             {
                 InitiateDirectionChests();
                 InitiateBuildingChests();
+                //InitiateDestroyers();
             }
             catch (Exception e)
             {
@@ -2501,92 +3144,92 @@ namespace chaosaddon
 
         /*
          Farm0
-FarmHouse1
-FarmCave2
-Town3
-JoshHouse4
-HaleyHouse5
-SamHouse6
-Blacksmith7
-ManorHouse8
-SeedShop9
-Saloon10
-Trailer11
-Hospital12
-HarveyRoom13
-Beach14
-BeachNightMarket15
-ElliottHouse16
-Mountain17
-ScienceHouse18
-SebastianRoom19
-Tent20
-Forest21
-WizardHouse22
-AnimalShop23
-LeahHouse24
-BusStop25
-Mine26
-Sewer27
-BugLand28
-Desert29
-Club30
-SandyHouse31
-ArchaeologyHouse32
-WizardHouseBasement33
-AdventureGuild34
-Woods35
-Railroad36
-WitchSwamp37
-WitchHut38
-WitchWarpCave39
-Summit40
-FishShop41
-BathHouse_Entry42
-BathHouse_MensLocker43
-BathHouse_WomensLocker44
-BathHouse_Pool45
-CommunityCenter46
-JojaMart47
-Greenhouse48
-SkullCave49
-Backwoods50
-Tunnel51
-Trailer_Big52
-Cellar53
-MermaidHouse54
-Submarine55
-AbandonedJojaMart56
-MovieTheater57
-Sunroom58
-BoatTunnel59
-IslandSouth60
-IslandSouthEast61
-IslandSouthEastCave62
-IslandEast63
-IslandWest64
-IslandNorth65
-IslandHut66
-IslandWestCave167
-IslandNorthCave168
-IslandFieldOffice69
-IslandFarmHouse70
-CaptainRoom71
-IslandShrine72
-IslandFarmCave73
-Caldera74
-LeoTreeHouse75
-QiNutRoom76
-MasteryCave77
-DesertFestival78
-LewisBasement79
-Cellar2 80
-Cellar3 81
-Cellar4 82
-Cellar5 83
-Cellar6 84
-Cellar7 85
-Cellar8 86
+    FarmHouse1
+    FarmCave2
+    Town3
+    JoshHouse4
+    HaleyHouse5
+    SamHouse6
+    Blacksmith7
+    ManorHouse8
+    SeedShop9
+    Saloon10
+    Trailer11
+    Hospital12
+    HarveyRoom13
+    Beach14
+    BeachNightMarket15
+    ElliottHouse16
+    Mountain17
+    ScienceHouse18
+    SebastianRoom19
+    Tent20
+    Forest21
+    WizardHouse22
+    AnimalShop23
+    LeahHouse24
+    BusStop25
+    Mine26
+    Sewer27
+    BugLand28
+    Desert29
+    Club30
+    SandyHouse31
+    ArchaeologyHouse32
+    WizardHouseBasement33
+    AdventureGuild34
+    Woods35
+    Railroad36
+    WitchSwamp37
+    WitchHut38
+    WitchWarpCave39
+    Summit40
+    FishShop41
+    BathHouse_Entry42
+    BathHouse_MensLocker43
+    BathHouse_WomensLocker44
+    BathHouse_Pool45
+    CommunityCenter46
+    JojaMart47
+    Greenhouse48
+    SkullCave49
+    Backwoods50
+    Tunnel51
+    Trailer_Big52
+    Cellar53
+    MermaidHouse54
+    Submarine55
+    AbandonedJojaMart56
+    MovieTheater57
+    Sunroom58
+    BoatTunnel59
+    IslandSouth60
+    IslandSouthEast61
+    IslandSouthEastCave62
+    IslandEast63
+    IslandWest64
+    IslandNorth65
+    IslandHut66
+    IslandWestCave167
+    IslandNorthCave168
+    IslandFieldOffice69
+    IslandFarmHouse70
+    CaptainRoom71
+    IslandShrine72
+    IslandFarmCave73
+    Caldera74
+    LeoTreeHouse75
+    QiNutRoom76
+    MasteryCave77
+    DesertFestival78
+    LewisBasement79
+    Cellar2 80
+    Cellar3 81
+    Cellar4 82
+    Cellar5 83
+    Cellar6 84
+    Cellar7 85
+    Cellar8 86
         */
 
 
