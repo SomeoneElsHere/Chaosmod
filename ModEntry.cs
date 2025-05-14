@@ -46,6 +46,7 @@ using System.Collections.Generic;
 using StardewValley.GameData.Locations;
 using static HarmonyLib.Code;
 using System.Linq.Expressions;
+using StardewValley.TerrainFeatures;
 
 // TO-ADD LIST
 
@@ -107,7 +108,7 @@ namespace chaosaddon
         int CurCurse = 5;  // The current curse (part of switch case logic)
         //curses
         Thread SuperSpeed;
-        Thread Blue;
+       
         Thread Jump;
         Thread Seasonal;
 
@@ -264,6 +265,8 @@ namespace chaosaddon
                     var data = asset.AsDictionary<string, ObjectData>().Data;
                     /// PIERRRE STORE ///
 
+
+                    
                     ///SEEDS///
 
                     ///Parsnip
@@ -414,6 +417,8 @@ namespace chaosaddon
 
             }
 
+
+
             /// DATA SHOPS
 
             if (e.NameWithoutLocale.IsEquivalentTo("Data/Shops"))
@@ -517,6 +522,8 @@ namespace chaosaddon
                     data.Add("WoodDestroyer", "388 50 335 5/Home/WoodDestroyer/true/default/");
                 });
             }
+
+            
         }
 
 
@@ -536,7 +543,7 @@ namespace chaosaddon
             //Thread teleport = new Thread(new ParameterizedThreadStart(randomWarpEvent));
             //teleport.Start(); //starts a teleport (see randomWarpEvent)
             //debug
-
+            
 
 
 
@@ -668,9 +675,7 @@ namespace chaosaddon
                     Game1.hudMessages.Add(new HUDMessage("You now get scared easily."));
                     break;
                 case 2:
-                    Blue = new Thread(BlueCurse);
-                    Blue.Start();
-                    Game1.hudMessages.Add(new HUDMessage("Your blue aba dee aba die"));
+                    
                     break;
                 case 3:
                     Seasonal = new Thread(SeasonalCurse);
@@ -723,18 +728,7 @@ namespace chaosaddon
                         break;
                     }
                 case 2:
-                    try
-                    {
-                        while (Blue.IsAlive)
-                        {
-
-                        }
-                        break;
-                    }
-                    catch (NullReferenceException c)
-                    {
-                        break;
-                    }
+                    
                 case 3:
                     try
                     {
@@ -775,10 +769,10 @@ namespace chaosaddon
         private async void OnTimeChanged(object? sender, TimeChangedEventArgs e)
         {
 
-
             
 
-            
+
+
             //debug 
 
 
@@ -815,28 +809,28 @@ namespace chaosaddon
                 {
                     //Console.WriteLine("chest->chest");
                     //Console.WriteLine("Rec:" + pair.Value.rec.tileLocation.X + " " + pair.Value.rec.tileLocation.Y);
-                    //Console.WriteLine("Don:" + pair.Value.donor.tileLocation.X + " " + pair.Value.donor.tileLocation.Y);
+                   // Console.WriteLine("Don:" + pair.Value.donor.tileLocation.X + " " + pair.Value.donor.tileLocation.Y);
                     transfer1(pair.Key, pair.Value.donor, pair.Value.rec);
                 }
                 else if (pair.Value.recM != null && pair.Value.donorM != null)
                 {
-                    //Console.WriteLine("obj->obj");
-                    //Console.WriteLine("Rec:" + pair.Value.recM.tileLocation.X + " " + pair.Value.recM.tileLocation.Y);
-                    //Console.WriteLine("Don:" + pair.Value.donorM.tileLocation.X + " " + pair.Value.donorM.tileLocation.Y);
+                    // Console.WriteLine("obj->obj");
+                   // Console.WriteLine("Rec:" + pair.Value.recM.tileLocation.X + " " + pair.Value.recM.tileLocation.Y);
+                   // Console.WriteLine("Don:" + pair.Value.donorM.tileLocation.X + " " + pair.Value.donorM.tileLocation.Y);
                     transfer2(pair.Key, pair.Value.donorM, pair.Value.recM);
                 }
                 else if (pair.Value.recM != null && pair.Value.donor != null)
                 {
                     //Console.WriteLine("chest->obj");
-                   // Console.WriteLine("Rec:" + pair.Value.recM.tileLocation.X + " " + pair.Value.recM.tileLocation.Y);
-                   // Console.WriteLine("Don:" + pair.Value.donor.tileLocation.X + " " + pair.Value.donor.tileLocation.Y);
+                   //Console.WriteLine("Rec:" + pair.Value.recM.tileLocation.X + " " + pair.Value.recM.tileLocation.Y);
+                  // Console.WriteLine("Don:" + pair.Value.donor.tileLocation.X + " " + pair.Value.donor.tileLocation.Y);
                     transfer3(pair.Key, pair.Value.donor, pair.Value.recM);
                 }
                 else if (pair.Value.rec != null && pair.Value.donorM != null)
                 {
                    // Console.WriteLine("obj->chest");
-                   // Console.WriteLine("Rec:" + pair.Value.rec.tileLocation.X + " " + pair.Value.rec.tileLocation.Y);
-                   // Console.WriteLine("Don:" + pair.Value.donorM.tileLocation.X + " " + pair.Value.donorM.tileLocation.Y);
+                  //  Console.WriteLine("Rec:" + pair.Value.rec.tileLocation.X + " " + pair.Value.rec.tileLocation.Y);
+                  //  Console.WriteLine("Don:" + pair.Value.donorM.tileLocation.X + " " + pair.Value.donorM.tileLocation.Y);
                     transfer4(pair.Key, pair.Value.donorM, pair.Value.rec);
                 }
 
@@ -852,6 +846,14 @@ namespace chaosaddon
                 if (d.ItemId == "OreDestroyer")
                 {
                     OreDestroyerTransfer(d);
+                }
+                else if (d.ItemId == "WoodDestroyer")
+                {
+                    WoodDestroyerTransfer(d);
+                }
+                else if(d.ItemId == "CropHarvester")
+                {
+                    CropHarvesterTransfer(d);
                 }
 
             }
@@ -1196,34 +1198,7 @@ namespace chaosaddon
 
             }
         }
-        public void BlueCurse()
-        {
-            try
-            {
-                ///player data to revert
-                int SkinOG = Game1.player.skin.Value;
-                Microsoft.Xna.Framework.Color HairOG = Game1.player.hairstyleColor.Get();
-
-
-                ///changing data
-                Game1.player.changeSkinColor(16);
-                Game1.player.changeHairColor(new Microsoft.Xna.Framework.Color(0, 0, 255));
-
-                while (CurseActive)
-                {
-
-                    Thread.Sleep(100);
-
-                }
-                ///reverting data
-                Game1.player.changeSkinColor(SkinOG);
-                Game1.player.changeHairColor(HairOG);
-            }
-            catch (NullReferenceException e)
-            {
-
-            }
-        }
+        
 
 
         public void SeasonalCurse()  /// 
@@ -1417,6 +1392,7 @@ namespace chaosaddon
 
         NPC getCharacterLocation(string npcName)
         {
+            StardewValley.Object item;
             foreach (GameLocation loc in Game1.locations)
             {
                 if (loc.characters.Count > 0)
@@ -1424,6 +1400,8 @@ namespace chaosaddon
 
                     foreach (NPC npc in loc.characters)
                     {
+
+                        
                         if (npc.Name == npcName)
                         {
                             Game1.addHUDMessage(new HUDMessage(npc.Name + " : " + loc.Name + " at " + npc.Tile.X + "," + npc.Tile.Y));
@@ -1437,7 +1415,7 @@ namespace chaosaddon
             return null;
         }
 
-
+       
         void doRomance(int seed)
         {
             int x = 2;
@@ -1510,26 +1488,26 @@ namespace chaosaddon
         }
 
 
-        static void addStack(String id, Chest inv, int amount)
+        static void addStack(String id, Chest inv, int amount)  // adds to a stack
         {
-            if (inv.Items.CountItemStacks() >= 32)
+            if (inv.GetActualCapacity() <= inv.Items.Count) // if the count is equal to or larger than count
             {
                 //Console.WriteLine("false return" + inv.ItemId + inv.TileLocation);
                 return;
             }
-            if (inv.Items.ContainsId(id))
+            if (inv.Items.ContainsId(id))  //if it contains the id
             {
                 bool didAdd = false;
                 foreach (Item i in inv.Items.GetById(id))
                 {
-                    if (i.getRemainingStackSpace() < amount)
+                    if (i.getRemainingStackSpace() < amount)  //if not enough space
                     {
                         //Console.WriteLine("Not enough space" + inv.ItemId + inv.TileLocation);
                         continue;
                     }
                     else
                     {
-                        didAdd = true;
+                        didAdd = true;  //then add it
                         i.Stack += amount;
                         break;
                     }
@@ -1617,7 +1595,7 @@ namespace chaosaddon
 
 
         }
-        static public void startTransfer(Chest DC, StardewValley.Object donor, StardewValley.Object rec)
+        static public void startTransfer(Chest DC, StardewValley.Object donor, StardewValley.Object rec) // does a bunch of things except trasnfering
         {
             int uhoh = 0;
             float x = DC.TileLocation.X;
@@ -1630,20 +1608,20 @@ namespace chaosaddon
             }
 
 
-            switch (DC.ItemId)
+            switch (DC.ItemId)  //  find all those sweet signal chests and add them to the list
             {
                 case "DirectionChestLeft":
 
-                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x, (int)y + 1)) && rec.Location.isTileOnMap(new Vector2((int)x, (int)y + 1)) && rec.Location.getObjectAtTile((int)x, (int)y + 1).ItemId != null)
+                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x, (int)y + 1)) && rec.Location.isTileOnMap(new Vector2((int)x, (int)y + 1)))
                     {
-                        if (rec.Location.getObjectAtTile((int)x, (int)y + 1).ItemId == "SignalChest")
+                        if (rec.Location.getObjectAtTile((int)x, (int)y + 1) != null && rec.Location.getObjectAtTile((int)x, (int)y + 1).ItemId == "SignalChest")
                         {
                             list.Add(((Chest)donor.Location.getObjectAtTile((int)x, (int)y + 1)));
                         }
                     }
-                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x, (int)y - 1)) && rec.Location.isTileOnMap(new Vector2((int)x, (int)y - 1)) && rec.Location.getObjectAtTile((int)x, (int)y - 1) != null)
+                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x, (int)y - 1)) && rec.Location.isTileOnMap(new Vector2((int)x, (int)y - 1)))
                     {
-                        if (rec.Location.getObjectAtTile((int)x, (int)y - 1).ItemId == "SignalChest")
+                        if (rec.Location.getObjectAtTile((int)x, (int)y - 1) != null && rec.Location.getObjectAtTile((int)x, (int)y - 1).ItemId == "SignalChest")
                         {
                             list.Add(((Chest)rec.Location.getObjectAtTile((int)x, (int)y - 1)));
                         }
@@ -1651,16 +1629,16 @@ namespace chaosaddon
                     break;
                 case "DirectionChestRight":
 
-                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x, (int)y + 1)) && rec.Location.isTileOnMap(new Vector2((int)x, (int)y + 1)) && rec.Location.getObjectAtTile((int)x, (int)y + 1).ItemId != null)
+                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x, (int)y + 1)) && rec.Location.isTileOnMap(new Vector2((int)x, (int)y + 1)))
                     {
-                        if (rec.Location.getObjectAtTile((int)x, (int)y + 1).ItemId == "SignalChest")
+                        if (rec.Location.getObjectAtTile((int)x, (int)y + 1) != null && rec.Location.getObjectAtTile((int)x, (int)y + 1).ItemId == "SignalChest")
                         {
                             list.Add(((Chest)donor.Location.getObjectAtTile((int)x, (int)y + 1)));
                         }
                     }
-                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x, (int)y - 1)) && rec.Location.isTileOnMap(new Vector2((int)x, (int)y - 1)) && rec.Location.getObjectAtTile((int)x, (int)y - 1) != null)
+                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x, (int)y - 1)) && rec.Location.isTileOnMap(new Vector2((int)x, (int)y - 1)))
                     {
-                        if (rec.Location.getObjectAtTile((int)x, (int)y - 1).ItemId == "SignalChest")
+                        if (rec.Location.getObjectAtTile((int)x, (int)y - 1) != null && rec.Location.getObjectAtTile((int)x, (int)y - 1).ItemId == "SignalChest")
                         {
                             list.Add(((Chest)rec.Location.getObjectAtTile((int)x, (int)y - 1)));
                         }
@@ -1668,16 +1646,16 @@ namespace chaosaddon
                     break;
                 case "DirectionChestUp":
 
-                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x - 1, (int)y)) && rec.Location.isTileOnMap(new Vector2((int)x - 1, (int)y)) && rec.Location.getObjectAtTile((int)x - 1, (int)y) != null)
+                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x - 1, (int)y)) && rec.Location.isTileOnMap(new Vector2((int)x - 1, (int)y)))
                     {
-                        if (rec.Location.getObjectAtTile((int)x - 1, (int)y).ItemId == "SignalChest")
+                        if (rec.Location.getObjectAtTile((int)x - 1, (int)y) != null && rec.Location.getObjectAtTile((int)x - 1, (int)y).ItemId == "SignalChest")
                         {
                             list.Add(((Chest)donor.Location.getObjectAtTile((int)x - 1, (int)y)));
                         }
                     }
-                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x + 1, (int)y)) && rec.Location.isTileOnMap(new Vector2((int)x + 1, (int)y)) && rec.Location.getObjectAtTile((int)x + 1, (int)y)!= null)
+                    if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x + 1, (int)y)) && rec.Location.isTileOnMap(new Vector2((int)x + 1, (int)y)))
                     {
-                        if (rec.Location.getObjectAtTile((int)x + 1, (int)y).ItemId == "SignalChest")
+                        if (rec.Location.getObjectAtTile((int)x + 1, (int)y) != null && rec.Location.getObjectAtTile((int)x + 1, (int)y).ItemId == "SignalChest")
                         {
                             list.Add(((Chest)rec.Location.getObjectAtTile((int)x + 1, (int)y)));
                         }
@@ -1687,14 +1665,14 @@ namespace chaosaddon
 
                     if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x - 1, (int)y)) && rec.Location.isTileOnMap(new Vector2((int)x - 1, (int)y)) && rec.Location.getObjectAtTile((int)x - 1, (int)y) != null)
                     {
-                        if (rec.Location.getObjectAtTile((int)x - 1, (int)y).ItemId == "SignalChest")
+                        if (rec.Location.getObjectAtTile((int)x - 1, (int)y) != null && rec.Location.getObjectAtTile((int)x - 1, (int)y).ItemId == "SignalChest")
                         {
                             list.Add(((Chest)donor.Location.getObjectAtTile((int)x - 1, (int)y)));
                         }
                     }
                     if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x + 1, (int)y)) && rec.Location.isTileOnMap(new Vector2((int)x + 1, (int)y)) && rec.Location.getObjectAtTile((int)x + 1, (int)y) != null)
                     {
-                        if (rec.Location.getObjectAtTile((int)x + 1, (int)y).ItemId == "SignalChest")
+                        if (rec.Location.getObjectAtTile((int)x + 1, (int)y) != null && rec.Location.getObjectAtTile((int)x + 1, (int)y).ItemId == "SignalChest")
                         {
                             list.Add(((Chest)rec.Location.getObjectAtTile((int)x + 1, (int)y)));
                         }
@@ -1703,8 +1681,7 @@ namespace chaosaddon
 
             }
 
-            try
-            {
+            
 
                 while (donor.ItemId.Contains("DirectionChest"))  //find the parent donor obj if it exists
                 {
@@ -1722,18 +1699,21 @@ namespace chaosaddon
                             }
 
                             donor = donor.Location.getObjectAtTile((int)x1 + 1, (int)y1);
-
+                            if (donor == null)
+                            {
+                                return;
+                            }
 
                             if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 + 1)) && donor.Location.isTileOnMap(new Vector2((int)x1, (int)y1 + 1)))
                             {
-                                if (donor.Location.getObjectAtTile((int)x1, (int)y1 + 1).ItemId == "SignalChest")
+                                if (donor.Location.getObjectAtTile((int)x1, (int)y1 + 1)!= null && donor.Location.getObjectAtTile((int)x1, (int)y1 + 1).ItemId == "SignalChest")
                                 {
                                     list.Add(((Chest)donor.Location.getObjectAtTile((int)x1, (int)y1 + 1)));
                                 }
                             }
                             if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 - 1)) && donor.Location.isTileOnMap(new Vector2((int)x1, (int)y1 - 1)))
                             {
-                                if (donor.Location.getObjectAtTile((int)x1, (int)y1 - 1).ItemId == "SignalChest")
+                                if (donor.Location.getObjectAtTile((int)x1, (int)y1 - 1) != null && donor.Location.getObjectAtTile((int)x1, (int)y1 - 1).ItemId == "SignalChest")
                                 {
                                     list.Add(((Chest)donor.Location.getObjectAtTile((int)x1, (int)y1 - 1)));
                                 }
@@ -1748,19 +1728,22 @@ namespace chaosaddon
                             }
 
                             donor = donor.Location.getObjectAtTile((int)x1 - 1, (int)y1);
+                             if (donor == null)
+                             {
+                                  return;
+                             }
 
 
-
-                            if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 + 1)) && donor.Location.isTileOnMap(new Vector2((int)x1, (int)y1 + 1)))
+                        if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 + 1)) && donor.Location.isTileOnMap(new Vector2((int)x1, (int)y1 + 1)))
                             {
-                                if (donor.Location.getObjectAtTile((int)x1, (int)y1 + 1).ItemId == "SignalChest")
+                            if (donor.Location.getObjectAtTile((int)x1, (int)y1 + 1) != null && donor.Location.getObjectAtTile((int)x1, (int)y1 + 1).ItemId == "SignalChest")
                                 {
                                     list.Add(((Chest)donor.Location.getObjectAtTile((int)x1, (int)y1 + 1)));
                                 }
                             }
                             if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 - 1)) && donor.Location.isTileOnMap(new Vector2((int)x1, (int)y1 - 1)))
                             {
-                                if (donor.Location.getObjectAtTile((int)x1, (int)y1 - 1).ItemId == "SignalChest")
+                                if (donor.Location.getObjectAtTile((int)x1, (int)y1 - 1) != null && donor.Location.getObjectAtTile((int)x1, (int)y1 - 1).ItemId == "SignalChest")
                                 {
                                     list.Add(((Chest)donor.Location.getObjectAtTile((int)x1, (int)y1 - 1)));
                                 }
@@ -1774,20 +1757,23 @@ namespace chaosaddon
 
 
                             donor = donor.Location.getObjectAtTile((int)x1, (int)y1 + 1);
-
-
-
-
-                            if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1 + 1, (int)y1)) && donor.Location.isTileOnMap(new Vector2((int)x1 + 1, (int)y1)))
+                            if (donor == null)
                             {
-                                if (donor.Location.getObjectAtTile((int)x1 + 1, (int)y1).ItemId == "SignalChest")
+                                return;
+                            }
+
+
+
+                        if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1 + 1, (int)y1)) && donor.Location.isTileOnMap(new Vector2((int)x1 + 1, (int)y1)))
+                            {
+                                if (donor.Location.getObjectAtTile((int)x1 + 1, (int)y1) != null && donor.Location.getObjectAtTile((int)x1 + 1, (int)y1).ItemId == "SignalChest")
                                 {
                                     list.Add(((Chest)donor.Location.getObjectAtTile((int)x1 + 1, (int)y1)));
                                 }
                             }
                             if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1 - 1, (int)y1)) && donor.Location.isTileOnMap(new Vector2((int)x1 - 1, (int)y1)))
                             {
-                                if (donor.Location.getObjectAtTile((int)x1 - 1, (int)y1).ItemId == "SignalChest")
+                                if (donor.Location.getObjectAtTile((int)x1 - 1, (int)y1) != null && donor.Location.getObjectAtTile((int)x1 - 1, (int)y1).ItemId == "SignalChest")
                                 {
                                     list.Add(((Chest)donor.Location.getObjectAtTile((int)x1 - 1, (int)y1)));
                                 }
@@ -1801,19 +1787,22 @@ namespace chaosaddon
                             }
 
                             donor = donor.Location.getObjectAtTile((int)x1, (int)y1 - 1);
-
-
-
-                            if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1 + 1, (int)y1)) && donor.Location.isTileOnMap(new Vector2((int)x1 + 1, (int)y1)))
+                             if (donor == null)
                             {
-                                if (donor.Location.getObjectAtTile((int)x1 + 1, (int)y1).ItemId == "SignalChest")
+                                  return;
+                            }
+
+
+                        if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1 + 1, (int)y1)) && donor.Location.isTileOnMap(new Vector2((int)x1 + 1, (int)y1)))
+                            {
+                                if (donor.Location.getObjectAtTile((int)x1 + 1, (int)y1) != null && donor.Location.getObjectAtTile((int)x1 + 1, (int)y1).ItemId == "SignalChest")
                                 {
                                     list.Add(((Chest)donor.Location.getObjectAtTile((int)x1 + 1, (int)y1)));
                                 }
                             }
                             if (!donor.Location.CanItemBePlacedHere(new Vector2((int)x1 - 1, (int)y1)) && donor.Location.isTileOnMap(new Vector2((int)x1 - 1, (int)y1)))
                             {
-                                if (donor.Location.getObjectAtTile((int)x1 - 1, (int)y1).ItemId == "SignalChest")
+                                if (donor.Location.getObjectAtTile((int)x1 - 1, (int)y1) != null && donor.Location.getObjectAtTile((int)x1 - 1, (int)y1).ItemId == "SignalChest")
                                 {
                                     list.Add(((Chest)donor.Location.getObjectAtTile((int)x1 - 1, (int)y1)));
                                 }
@@ -1823,23 +1812,19 @@ namespace chaosaddon
                     }
                     if (++uhoh > 100)
                     {
+                        
                         return;
                     }
                 }
-            }
-            catch (NullReferenceException one)
-            {
-                donor = new Chest();
-                return;
-            }
+            
+            
 
 
 
 
             uhoh = 0;
 
-            try
-            {
+            
                 while (rec.ItemId.Contains("DirectionChest"))  // find parent rec if it exists
                 {
                     float x1 = rec.TileLocation.X;
@@ -1854,19 +1839,22 @@ namespace chaosaddon
                             }
 
                             rec = rec.Location.getObjectAtTile((int)x1 - 1, (int)y1);
-
+                        if(rec == null)
+                        {
+                            return;
+                        }
 
 
                             if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 + 1)) && rec.Location.isTileOnMap(new Vector2((int)x1, (int)y1 + 1)))
                             {
-                                if (rec.Location.getObjectAtTile((int)x1, (int)y1 + 1).ItemId == "SignalChest")
+                                if (rec.Location.getObjectAtTile((int)x1, (int)y1 + 1) != null && rec.Location.getObjectAtTile((int)x1, (int)y1 + 1).ItemId == "SignalChest")
                                 {
                                     list.Add(((Chest)donor.Location.getObjectAtTile((int)x1, (int)y1 + 1)));
                                 }
                             }
                             if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 - 1)) && rec.Location.isTileOnMap(new Vector2((int)x1, (int)y1 - 1)))
                             {
-                                if (rec.Location.getObjectAtTile((int)x1, (int)y1 - 1).ItemId == "SignalChest")
+                                if (rec.Location.getObjectAtTile((int)x1, (int)y1 - 1) != null && rec.Location.getObjectAtTile((int)x1, (int)y1 - 1).ItemId == "SignalChest")
                                 {
                                     list.Add(((Chest)rec.Location.getObjectAtTile((int)x1, (int)y1 - 1)));
                                 }
@@ -1879,19 +1867,22 @@ namespace chaosaddon
                             }
 
                             rec = rec.Location.getObjectAtTile((int)x1 + 1, (int)y1);
+                        if (rec == null)
+                        {
+                            return;
+                        }
 
 
-
-                            if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 + 1)) && rec.Location.isTileOnMap(new Vector2((int)x1, (int)y1 + 1)))
+                        if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 + 1)) && rec.Location.isTileOnMap(new Vector2((int)x1, (int)y1 + 1)))
                             {
-                                if (rec.Location.getObjectAtTile((int)x1, (int)y1 + 1).ItemId == "SignalChest")
+                                if (rec.Location.getObjectAtTile((int)x1, (int)y1 + 1) != null && rec.Location.getObjectAtTile((int)x1, (int)y1 + 1).ItemId == "SignalChest")
                                 {
                                     list.Add(((Chest)donor.Location.getObjectAtTile((int)x1, (int)y1 + 1)));
                                 }
                             }
                             if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1, (int)y1 - 1)) && rec.Location.isTileOnMap(new Vector2((int)x1, (int)y1 - 1)))
                             {
-                                if (rec.Location.getObjectAtTile((int)x1, (int)y1 - 1).ItemId == "SignalChest")
+                                if (rec.Location.getObjectAtTile((int)x1, (int)y1 - 1) != null && rec.Location.getObjectAtTile((int)x1, (int)y1 - 1).ItemId == "SignalChest")
                                 {
                                     list.Add(((Chest)rec.Location.getObjectAtTile((int)x1, (int)y1 - 1)));
                                 }
@@ -1904,21 +1895,24 @@ namespace chaosaddon
                             }
 
                             rec = rec.Location.getObjectAtTile((int)x1, (int)y1 - 1);
+                        if (rec == null)
+                        {
+                            return;
+                        }
 
 
 
 
-
-                            if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1 - 1, (int)y1)) && rec.Location.isTileOnMap(new Vector2((int)x1 - 1, (int)y1)))
+                        if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1 - 1, (int)y1)) && rec.Location.isTileOnMap(new Vector2((int)x1 - 1, (int)y1)))
                             {
-                                if (rec.Location.getObjectAtTile((int)x1 - 1, (int)y1).ItemId == "SignalChest")
+                                if (rec.Location.getObjectAtTile((int)x1 - 1, (int)y1) != null && rec.Location.getObjectAtTile((int)x1 - 1, (int)y1).ItemId == "SignalChest")
                                 {
                                     list.Add(((Chest)donor.Location.getObjectAtTile((int)x1 - 1, (int)y1)));
                                 }
                             }
                             if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1 + 1, (int)y1)) && rec.Location.isTileOnMap(new Vector2((int)x1 + 1, (int)y1)))
                             {
-                                if (rec.Location.getObjectAtTile((int)x1 + 1, (int)y1).ItemId == "SignalChest")
+                                if (rec.Location.getObjectAtTile((int)x1 + 1, (int)y1) != null && rec.Location.getObjectAtTile((int)x1 + 1, (int)y1).ItemId == "SignalChest")
                                 {
                                     list.Add(((Chest)rec.Location.getObjectAtTile((int)x1 + 1, (int)y1)));
                                 }
@@ -1931,19 +1925,22 @@ namespace chaosaddon
                             }
 
                             rec = rec.Location.getObjectAtTile((int)x1, (int)y1 + 1);
+                        if (rec == null)
+                        {
+                            return;
+                        }
 
 
-
-                            if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1 - 1, (int)y1)) && rec.Location.isTileOnMap(new Vector2((int)x1 - 1, (int)y1)))
+                        if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1 - 1, (int)y1)) && rec.Location.isTileOnMap(new Vector2((int)x1 - 1, (int)y1)))
                             {
-                                if (rec.Location.getObjectAtTile((int)x1 - 1, (int)y1).ItemId == "SignalChest")
+                                if (rec.Location.getObjectAtTile((int)x1 - 1, (int)y1) != null && rec.Location.getObjectAtTile((int)x1 - 1, (int)y1).ItemId == "SignalChest")
                                 {
                                     list.Add(((Chest)donor.Location.getObjectAtTile((int)x1 - 1, (int)y1)));
                                 }
                             }
                             if (!rec.Location.CanItemBePlacedHere(new Vector2((int)x1 + 1, (int)y1)) && rec.Location.isTileOnMap(new Vector2((int)x1 + 1, (int)y1)))
                             {
-                                if (rec.Location.getObjectAtTile((int)x1 + 1, (int)y1).ItemId == "SignalChest")
+                                if (rec.Location.getObjectAtTile((int)x1 + 1, (int)y1) != null && rec.Location.getObjectAtTile((int)x1 + 1, (int)y1).ItemId == "SignalChest")
                                 {
                                     list.Add(((Chest)rec.Location.getObjectAtTile((int)x1 + 1, (int)y1)));
                                 }
@@ -1954,19 +1951,16 @@ namespace chaosaddon
 
                     if (++uhoh > 100)
                     {
+                        
                         return;
                     }
                 }
-            }
-            catch (NullReferenceException two)
-            {
-                rec = new Chest();
-                return;
-            }
+            
 
 
             if (rec == null || donor == null)
             {
+                
                 return;
             }
 
@@ -1974,7 +1968,7 @@ namespace chaosaddon
 
 
 
-
+            
             foreach (Chest c in list)  // removes duplicates in list
             {
                 Predicate<Chest> pre = delegate (Chest a) { return c.TileLocation == a.TileLocation; };
@@ -1983,7 +1977,7 @@ namespace chaosaddon
                     list.Remove(c);
                 }
             }
-
+            
 
 
 
@@ -2066,11 +2060,11 @@ namespace chaosaddon
         }
         static void transfer1(Chest DC, Chest d, Chest r) //object transfer based on 2 chests
         {
-            //Console.WriteLine("Transfer 1" + DC.TileLocation);
+            
 
             if (checkForSignal(DC) == false)  // if there is a signal chest with no signals, return.
             {
-
+                
                 return;
             }
             Inventory inv = new Inventory();
@@ -2083,6 +2077,7 @@ namespace chaosaddon
                 }
             }
 
+           
 
             foreach (StardewValley.Item obj in inv)
             {
@@ -2090,7 +2085,7 @@ namespace chaosaddon
                 foreach (StardewValley.Item item in DC.Items)
                 {
                     
-                    if (obj != null && item != null && r.Items.CountItemStacks() < 32 && (item.ItemId == obj.ItemId || DC.Items.ContainsId("SIGNAL")))
+                    if (obj != null && item != null && r.Items.Count < r.GetActualCapacity() && (item.ItemId == obj.ItemId || DC.Items.ContainsId("SIGNAL")))
                     {
                         if (obj as ColoredObject != null)
                         {
@@ -2098,7 +2093,7 @@ namespace chaosaddon
                             Farmer f = new Farmer();
                             d.GetItemsForPlayer().Remove(obj);
 
-                            addStack(obj.ItemId, r, 1);
+                            addStack(obj.ItemId, r, obj.Stack);
 
                         }
                         else
@@ -2108,7 +2103,7 @@ namespace chaosaddon
                             Farmer f = new Farmer();
                             d.GetItemsForPlayer().Remove(obj);
 
-                            addStack(obj.ItemId, r, 1);
+                            addStack(obj.ItemId, r, obj.Stack);
 
                         }
 
@@ -2137,7 +2132,7 @@ namespace chaosaddon
                 d.heldObject.Value = null;
                 if (!MachineDataUtility.HasAdditionalRequirements(f.Items, r.GetMachineData().AdditionalConsumedItems, out var failedRequirement))
                 {
-                    return;
+                    return;  // if the additional requirements for the machine recipe is not fuffilled
                 }
                 MachineOutputRule output = null;
                 MachineOutputTriggerRule outputrule = null;
@@ -2145,6 +2140,8 @@ namespace chaosaddon
                 MachineOutputTriggerRule ignoreoutputrule = null;
 
                 //here is my little if statement pit. its better than having it in one big line so it exits.
+                //blah blah blah, check if the machine output rule for the item exists
+
                 if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.None, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
                 {
                     if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.DayUpdate, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
@@ -2192,7 +2189,7 @@ namespace chaosaddon
                 f.Items.AddRange(d.Items);
                 foreach (StardewValley.Item o in d.Items)
                 {
-                    foreach (StardewValley.Item DCo in DC.Items)
+                    foreach (StardewValley.Item DCo in DC.Items) // for each object in d that matches the object in DC chest, unless its a signal then we ignore this.
                     {
 
                         if (o == null || DCo == null || r.heldObject == null)
@@ -2206,7 +2203,7 @@ namespace chaosaddon
                             MachineOutputRule output = null;
                             MachineOutputTriggerRule outputrule = null;
                             MachineOutputRule ignorecount = null;
-                            MachineOutputTriggerRule ignoreoutputrule = null;
+                            MachineOutputTriggerRule ignoreoutputrule = null;  //blah blah blah, check if the machine output rule for the item exists
                             if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.None, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
                             {
                                 if (!MachineDataUtility.TryGetMachineOutputRule(r, r.GetMachineData(), MachineOutputTrigger.DayUpdate, o, f, DC.Location, out output, out outputrule, out ignorecount, out ignoreoutputrule))
@@ -2255,9 +2252,9 @@ namespace chaosaddon
 
             }
         }
-        static void transfer4(Chest DC, StardewValley.Object d, Chest r)
+        static void transfer4(Chest DC, StardewValley.Object d, Chest r)  //for a object -->chest
         {
-
+            
             if (checkForSignal(DC) == false)
             {
                 return;
@@ -2266,18 +2263,18 @@ namespace chaosaddon
 
 
 
-            foreach (StardewValley.Object DCo in DC.Items)
+            foreach (StardewValley.Object DCo in DC.Items) // for each object that matches the object in DC chest, unless its a signal then we ignore this.
             {
 
 
-                if (DCo != null && d.heldObject.Value != null && d.readyForHarvest.Value && r.Items.CountItemStacks() < 32 && (d.heldObject.Value.ItemId == DCo.ItemId || DC.Items.ContainsId("SIGNAL")))
+                if (DCo != null && d.heldObject.Value != null && d.readyForHarvest.Value && r.Items.Count < r.GetActualCapacity() && (d.heldObject.Value.ItemId == DCo.ItemId || DC.Items.ContainsId("SIGNAL")))
                 {
 
                     StardewValley.Object o = new StardewValley.Object();
-                    d.heldObject.Value.DeepCloneTo(o);
+                    d.heldObject.Value.DeepCloneTo(o);  //remove the item
                     d.heldObject.Value = null;
 
-                    addStack(o.ItemId, r, 1);
+                    addStack(o.ItemId, r, o.Stack); // add it
 
 
                 }
@@ -2287,7 +2284,7 @@ namespace chaosaddon
 
 
 
-        static void InitiateBuildingChests()
+        static void InitiateBuildingChests()  //Initiate the building chests
         {
             Bpairs = new Dictionary<StardewValley.Buildings.Building, Chest>();
 
@@ -2304,7 +2301,7 @@ namespace chaosaddon
                         {
                             B = (Chest)loc.getObjectAtTile(x, b.tileY.Value - 1);
                             Bpairs.Add(b, B);
-                            transferB(b, B);
+                            transferB(b, B); 
                             return;
                         }
                         if (loc.isObjectAtTile(x, b.tileY.Value + b.tilesHigh.Value) && loc.getObjectAtTile(x, b.tileY.Value + b.tilesHigh.Value).ItemId == ("130"))
@@ -2337,7 +2334,7 @@ namespace chaosaddon
             }
         }
 
-        static void transferB(StardewValley.Buildings.Building build, Chest chst)
+        static void transferB(StardewValley.Buildings.Building build, Chest chst)  // transfer items from a building to the chest.
         {
             if (build is StardewValley.Buildings.FishPond fish)
             {
@@ -2358,7 +2355,7 @@ namespace chaosaddon
         }
 
 
-        static void InitiateDestroyers()
+        static void InitiateDestroyers() //Initaiate destroyers!
         {
             Destroyers.Clear();
             foreach (GameLocation loc in Game1.locations)
@@ -2367,16 +2364,26 @@ namespace chaosaddon
                 {
                     if (obj.ItemId == "CropHarvester" || obj.ItemId == "OreDestroyer" || obj.ItemId == "WoodDestroyer")
                     {
-                        Destroyers.Add((Chest)obj);
+                        Destroyers.Add((Chest)obj); //add the destroyers.
                     }
 
                 }
             }
 
-            foreach (Chest d in Destroyers)
+            foreach (Chest d in Destroyers) //and run them!
             {
                 if (d.ItemId == "OreDestroyer")
+                {
                     OreDestroyerTransfer(d);
+                }
+                else if(d.ItemId == "WoodDestroyer")
+                {
+                    WoodDestroyerTransfer(d);
+                }
+                else if(d.ItemId == "CropHarvester")
+                {
+                    CropHarvesterTransfer(d);
+                }
             }
         }
 
@@ -2387,16 +2394,16 @@ namespace chaosaddon
             float x = ore.tileLocation.X - 2;
             float y = ore.tileLocation.Y - 2;
 
-            for (float y1 = y; y1 < y + 5; y1++)
+            for (float y1 = y; y1 < y + 5; y1++)  // for a 5 by 5 area
             {
                 for (float x1 = x; x1 < x + 5; x1++)
                 {
-                    if (ore.Location.hasTileAt((int)x1, (int)y1, "Back") && ore.Location.getObjectAtTile((int)x1, (int)y1) != null)
+                    if (ore.Location.hasTileAt((int)x1, (int)y1, "Back") && ore.Location.getObjectAtTile((int)x1, (int)y1) != null) // if has a tile
                     {
                         StardewValley.Object o = ore.Location.getObjectAtTile((int)x1, (int)y1);
-                        if (o.isDebrisOrForage() && ore.Items.CountItemStacks() < 32)
+                        if (o.isDebrisOrForage()) //if its a forage item
                         {
-                            switch (o.ItemId)
+                            switch (o.ItemId)  // look at every single rock and give the proper items.
                             {
                                 case "2":
                                     addStack("72", ore, 1);
@@ -2489,6 +2496,57 @@ namespace chaosaddon
             }
         }
 
+        static void WoodDestroyerTransfer(Chest ore)
+        {
+            float x = ore.tileLocation.X - 2;
+            float y = ore.tileLocation.Y - 2;
+            
+            for (float y1 = y; y1 < y + 5; y1++)
+            {
+                for (float x1 = x; x1 < x + 5; x1++)
+                {
+                    Vector2 vect = new Vector2(((int)x1 ), ((int)y1));
+                    
+                        
+                    if(ore.Location.terrainFeatures.TryGetValue(vect, out var value) && !value.isPassable() && value as Tree != null)
+                    {
+                        value.Location.removeEverythingFromThisTile((int)x1, (int)y1);
+                        StardewValley.Object o = new StardewValley.Object("388", 30);
+                        ore.addItem(o);
+                    }
+                }
+            }
+
+        }
+
+
+        static void CropHarvesterTransfer(Chest ore) // transfer crops to the chest
+        {
+           int x = (int)ore.tileLocation.X - 2;
+            int y = (int)ore.tileLocation.Y - 2;
+
+            for (int y1 = y; y1 < y + 5; y1++)
+            {
+                for (int x1 = x; x1 < x + 5; x1++) // in a 5 by 5 area
+                {
+                    Vector2 vect = new Vector2(((int)x1), ((int)y1));
+
+                    TerrainFeature value;
+                    //check if a crop is at the tile, if it exists, and if its ready to harvest (and if its hoedirt)
+                    if (ore.Location.isCropAtTile((int)x1,(int)y1)&& ore.Location.terrainFeatures.TryGetValue(vect, out value) && value as HoeDirt != null && (value as HoeDirt).readyForHarvest())
+                    {
+                        ore.Location.terrainFeatures.TryGetValue(vect, out value);
+                        HoeDirt crop = value as HoeDirt;
+                        StardewValley.Object obj = new StardewValley.Object(crop.crop.GetData().HarvestItemId, crop.crop.GetData().HarvestMinStack);
+                        ore.addItem(obj); //add it 
+                        crop.crop.harvest(x1, y1,crop); //remove it
+                        Game1.player.removeItemFromInventory(obj);
+
+                    }
+                }
+            }
+
+        }
 
         // NEW CHANGES
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
@@ -3038,10 +3096,10 @@ namespace chaosaddon
                 InitiateBuildingChests();
                 InitiateDestroyers();
            }
-            catch (Exception e)
+           catch (Exception e)
            {
 
-                Console.WriteLine("Chaosaddon: Ah fuck. Something in the Harmony patch \"GetplacementAction2\" went wrong.");
+              Console.WriteLine("Chaosaddon: Ah fuck. Something in the Harmony patch \"GetplacementAction2\" went wrong.");
 
            }
         }
