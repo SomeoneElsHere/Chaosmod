@@ -520,6 +520,9 @@ namespace chaosaddon
                     data.Add("CropHarvester", "388 50 335 5/Home/CropHarvester/true/default/");
                     data.Add("OreDestroyer", "388 50 335 5/Home/OreDestroyer/true/default/");
                     data.Add("WoodDestroyer", "388 50 335 5/Home/WoodDestroyer/true/default/");
+
+                    data.Add("Mini Shipping Bin", "388 50 336 5/Home/248/true/default/");
+                    data.Add("Junimo Chest", "388 50 337 5/Home/256/true/default/");
                 });
             }
 
@@ -2223,20 +2226,31 @@ namespace chaosaddon
 
                             }
 
-
+                            
                             if (o.Stack < output.Triggers[0].RequiredCount)
                             {
                                 continue;
                             }
 
+                            foreach (MachineItemAdditionalConsumedItems item in r.GetMachineData().AdditionalConsumedItems) //check if the additional items needed is met.
+                            {
+                                bool hasItem = false;
+                                foreach (StardewValley.Item oi in d.Items)
+                                {
+                                    if (oi.ItemId == item.ItemId && (oi.Stack >= item.RequiredCount))
+                                    {
+                                        hasItem = true;
+                                    }
 
-
-
+                                }
+                                if(!hasItem)
+                                {
+                                    continue;
+                                }
+                            }
                             r.PlaceInMachine(r.GetMachineData(), o, false, f);
-
-                            d.Items.Reduce(o, output.Triggers[0].RequiredCount);
-                            f.Items.Reduce(o, output.Triggers[0].RequiredCount);
-
+                            
+                            
                             return;
                         }
                         else if (r.heldObject.Value == null && r.MinutesUntilReady != 0)
