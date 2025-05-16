@@ -2235,6 +2235,10 @@ namespace chaosaddon
                             foreach (MachineItemAdditionalConsumedItems item in r.GetMachineData().AdditionalConsumedItems) //check if the additional items needed is met.
                             {
                                 bool hasItem = false;
+                                if(o.ItemId == item.ItemId)
+                                {
+                                    continue;
+                                }
                                 foreach (StardewValley.Item oi in d.Items)
                                 {
                                     if (oi.ItemId == item.ItemId && (oi.Stack >= item.RequiredCount))
@@ -2248,9 +2252,14 @@ namespace chaosaddon
                                     continue;
                                 }
                             }
+
+                            if (o.Stack == output.Triggers[0].RequiredCount)
+                            {
+                                r.PlaceInMachine(r.GetMachineData(), o, false, f);
+                                d.Items.Reduce(o, output.Triggers[0].RequiredCount);
+                                return;
+                            }
                             r.PlaceInMachine(r.GetMachineData(), o, false, f);
-                            
-                            
                             return;
                         }
                         else if (r.heldObject.Value == null && r.MinutesUntilReady != 0)
