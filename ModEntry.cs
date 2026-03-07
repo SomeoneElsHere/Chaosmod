@@ -221,10 +221,10 @@ namespace chaosaddon
 
 
 
-            harmony.Patch(
+            /*harmony.Patch(
             original: AccessTools.Method(typeof(BuffManager), nameof(BuffManager.Update)),
             transpiler: new HarmonyMethod(typeof(ModEntry), nameof(BuffUpdate_Transpiler))
-            );
+            );*/
 
 
 
@@ -469,6 +469,13 @@ namespace chaosaddon
 
                     data.Add("WrongAddress1", "Hey. It's been a while, Yu. It's been a while since the incident way back in Inaba. ^I doubt I would ever get parole for what I did, but who cares about that yeah? ^^ Haha.. just kidding, I'm making plenty enough friends down where I am. Anyways, make sure you visit that old geezer sometime to make sure he's fine yeah? ^^ Just between me and you, I think he would want the company.");
                     data.Add("WrongAddress2", "HEY MAN! It's Joe. ^ I know I have a lot of work nowadays with all the gangs and shit but I was wonderin if you still want that old guitar that Neko stole.  ^ It's a bit too old for me nowadays, so I bought another, ...ya want it?^ ANYWAYS. Take care of ya self man!");
+                    data.Add("WrongAddress3", "TO: MONOKUMA ^^ Looking at the remix you sent me, it's great! I wish there was a little more bass though, ynow? ^ Like, a really cool bass moment. ^^ Think of the craziest bass solo. Like, focus on that. ^ ^ ^ -Wright  ");
+                    data.Add("WrongAddress4", "TO: WRIGHT ^^ I know you have been working on those 'cool rips' for the KFAD tournament, but let me just plead for a second. ^^ You are working with a KNOWN serial killer here. She has killed hundreds of people. ^ ^ I dont care how 'cool' or 'sick' this music is, you have to have some idea of your morals here, Wright. ^^ And please, stop sending me cat memes from 2011 for fucks sake. ^ ^ -Edgeworth ");
+                    data.Add("WrongAddress5", "Incident Report #####: Killer Tomatoes on Druid Class Spaceship ^^ Neotransen worker, Eveline Tokkori, was found making mass amounts of mutated, rabid tomatoes on a Druid class spaceship ^ in the Frontier area. ^^ It is probable that she had messed around with mutagen, but to this degree seems.. odd. ^^ She was found gibbed, and a clone has been made. ^ ^ Please inform her, once again, the dangers of mutagen. ");
+                    data.Add("WrongAddress6", "Hey, you. You’re finally awake. You were trying to cross the border, right? Walked right into that Imperial ambush, same as us, and that thief over there. -Ralof");
+                    data.Add("WrongAddress7", "DON'T GO TO FUCKING SLEEP. I SWEAR TO GOD EVERY TIME I HAVE TO TELL YOU FUCKS THIS, BUT NOBODY ON THIS FUCKING ASTEROID IS GOING TO SLEEP. -CG");
+                    data.Add("WrongAddress8", "Poyo! (The rest is gibbersh.)");
+                    data.Add("uhwhat", "#########, Baltimore! ^^^ If you're dumb enough to buy a new car this weekend, you're a big enough schmuck to come to Big Bills Hell Cars!! ^^ Bad deals! Cars that break down! Thieves! ^^ If you think you're going to find a bargain at Big Bill's, you can ######! ^^ It's our belief that you're such a ########, you'll fall for this #########—guaranteed!^ If you find a better deal, ##########! ^^ You heard us right! #########! ^^ Bring your trade! Bring your title! Bring your ######## ^ That's right! ^ We'll ########## ^^ Because at Big Bill Hell, you're #######! ^^^ Take a hike to Big Bill Hell's, Home of Challenge Pissing! ^ That's right! Challenge Pissing! ^^ How does it work? ^ If you can #### six feet in the air straight up and not get wet, you get no down payment! ^ Don't wait! Don't delay! Don't ########! ^ Only at Big Bill Hell's, the only dealer that ########! ^ Hurry up ####! ^^ This event ends the minute after you write us a cheque ^ -and it better not bounce or you're ######! ^^ Go to hell—Big Bill Hell's Cars! Baltimore's filthiest, and exclusive home of ########## in the state of Maryland ^ -guaranteed! ^^ -Tenna");
 
                     data.Add("FunFact1", "Fun fact: this is the first fun fact in written in the mod.");
                     data.Add("FunFact2", "Fun fact: Im typing this on homestuck day.");
@@ -635,15 +642,17 @@ namespace chaosaddon
             }
 
             /// Rare mail
-            int r = new Random(DateAndTime.Now.Millisecond).Next(128);
-            if (r == 1)
+            int r = new Random(DateAndTime.Now.Millisecond).Next(1800); //changed to be rarer
+            if (r <9)
             {
-                Game1.addMail("WrongAddress1");
+                Game1.addMail("WrongAddress"+r);
             }
-            if (r == 2)
+            if(r==1779 || r == 900)
             {
-                Game1.addMail("WrongAddress2");
+                Game1.addMail("uhwhat");
             }
+            
+
 
 
             //SLEEP CHANGES
@@ -677,6 +686,7 @@ namespace chaosaddon
 
             CurseActive = true;
             CurCurse = new Random().Next(0, 6);
+            
             switch (CurCurse)
             {
                 case 0:
@@ -818,20 +828,7 @@ namespace chaosaddon
 
             //debug 
 
-
-            //fixing it so you can shop at clints even if you are married to him.
-
-            if (Game1.timeOfDay == 900 && Game1.player.getSpouse() != null && Game1.player.getSpouse().Name == "Clint")
-            {
-                Game1.warpCharacter(Game1.getCharacterFromName("Clint"), "Blacksmith", new Vector2(3, 13));
-            }
-            else if (Game1.timeOfDay == 1600 && Game1.player.getSpouse() != null && Game1.player.getSpouse().Name == "Clint")
-            {
-
-                Game1.warpCharacter(Game1.getCharacterFromName("Clint"), Game1.locations[0], new Vector2(34, 5));
-            }
-
-            //Same for willy
+            //fixing it so you can shop at willys even if you are married to him.
 
             if (Game1.timeOfDay == 900 && Game1.player.getSpouse() != null && Game1.player.getSpouse().Name == "Willy")
             {
@@ -1235,12 +1232,14 @@ namespace chaosaddon
                 {
                     while (CurseActive)
                     {
+
                         int HealthOG = 0;
                         float EnergyOG = 0f;
                         while (!Game1.player.isEating)
                         {
                             if (!CurseActive)
                                 break;
+
 
                         }
                         HealthOG = Game1.player.health;
@@ -1251,7 +1250,7 @@ namespace chaosaddon
                                 break;
 
                         }
-                        if (new Random().Next(0, 10) > 8 && !CurseActive)
+                        if (new Random().Next(0, 10) > 8 && CurseActive)
                         {
 
                             Thread.Sleep(1000);
@@ -1384,7 +1383,7 @@ namespace chaosaddon
                         while (!(Game1.getMusicTrackName() != null && BPM.TryGetValue(Game1.getMusicTrackName(), out val) && Game1.player != null))
                         {
                             Thread.Sleep(1);
-                            //Console.WriteLine("fail");
+                            Console.WriteLine("fail bpm");
                         }
                         if (Game1.getMusicTrackName() != null)
                         {
@@ -1481,7 +1480,7 @@ namespace chaosaddon
                     }
                 }
 
-                if ((seed % x > x / 2) && (data.Value.Age == NpcAge.Adult)) //Adults only! 
+                if ((seed % x > x / 2) && (data.Value.Age == NpcAge.Adult) && (!data.Value.DisplayName.Equals("Clint"))) //Adults only! (also removing clint due to stardew update)
                 {
                     //Seed mod x must be greater than all the possible values.
                     //(not quite this in retrospect but it works)
@@ -1493,7 +1492,7 @@ namespace chaosaddon
                     .SetValue(n, t);
 
                 }
-                else
+                else if (!data.Value.DisplayName.Equals("Clint")) //no clint bc update
                 {
 
                     can = false;
