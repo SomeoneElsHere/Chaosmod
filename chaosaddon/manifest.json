@@ -1,7 +1,7 @@
 ﻿{
     "Name": "chaosaddon",
     "Author": "SomeoneEls",
-    "Version": "2.2.5",
+    "Version": "2.0.0",
     "Description": "code addon to the chaos mod",
     "UniqueID":"SomeoneEls.chaosaddon",
     "EntryDll":"chaosaddon.dll",

@@ -65,6 +65,35 @@
             "Action": "Load",
             "Target": "Tilesheets/DirectionChests",
             "FromFile": "XNB files/Tilesheets/DirectionChests.xnb"
+        },
+        {
+            "Action": "Load",
+            "Target": "Maps/{{ModID}}_killme",
+            "FromFile": "Lewis/waiting.tmx"
+        },
+        {
+            "Action": "EditData",
+            "Target": "Data/Locations",
+            "Entries": {
+                "{{ModID}}_killme": { 
+                    "DisplayName": "huh",
+                    "DefaultArrivalTile": {
+                        "X": 16,
+                        "Y": 8
+                    },
+                    "CreateOnLoad": {
+                        "MapPath": "Maps/{{ModID}}_killme"
+                    }
+                }
+            }
+        },
+        {
+            "Action": "EditData",
+            "Target": "Data/Events/Town",
+            "Entries": {
+                "Chaosaddon_Lewis/f Lewis 2500/t 2000 260": "nightTime/-1000 -1000/Lewis 9 17 3 Marnie 30 17 3/viewport 0 0/skippable/pause 1/changeLocation Woods/viewport 11 20 clamp true/warp Lewis 9 17/warp Marnie 30 17/pause 1000/speak Lewis \"Shoot.... Did she see it? $2\"/move Marnie -17 0 3/pause 3000/speak Marnie \"Lewis... \" /jump Lewis/pause 1000/move Lewis 0 0 1/speak Lewis \"Marnie!$1\" /speak Marnie \"I heard you wanted to speak to me... in private. $2\"/move Lewis 0 0 3/speak Lewis \"Oh.. uhm... (tighting his collar) yes... $2\"/stopMusic/pause 2000/move Lewis 0 0 1/speak Lewis \" I...$2\"/playMusic night_market/pause 2000/speak Lewis \"Can we... make this... official?$2\"/pause 3000/move Marnie -1 0 3/speak Marnie \"I... Love you too, baby... Yes...$1\"/speak Lewis \"Really??$1\" /move Marnie -2 0 3/speak Marnie \" Yes... NOW PUCKER UP!!!!$1\"/globalfade/viewport -1000 -1000/changeLocation {{ModID}}_killme/warp farmer -100 -100/viewport 16 3 clamp true/pause 5000/viewport -1000 -1000/stopMusic/pause 5000/changeLocation ManorHouse/viewport 16 6 clamp true/warp Lewis 21 4/playMusic playful/speak Lewis \"..ungh... $2\"/speak Lewis \"Wait...that was a dream? $5\"/message \"DAMMI-\"/end"
+            }
+
         }
     ]
 }

@@ -50,6 +50,7 @@ using StardewValley.TerrainFeatures;
 using System.Diagnostics.CodeAnalysis;
 using StardewValley.Extensions;
 using StardewValley.Buildings;
+using StardewModdingAPI.Integrations.GenericModConfigMenu;
 
 
 // TO-ADD LIST
@@ -112,6 +113,7 @@ namespace chaosaddon
         int CurCurse = 5;  // The current curse (part of switch case logic)
         //curses
         Thread SuperSpeed;
+        Thread secretLetterLoop;
 
         Thread Jump;
         Thread Seasonal;
@@ -191,6 +193,7 @@ namespace chaosaddon
             helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.GameLoop.TimeChanged += this.OnTimeChanged;
+            helper.Events.GameLoop.DayEnding += this.OnDayEnding;
 
             helper.Events.Display.RenderedActiveMenu += this.OnRenderedActiveMenu;
 
@@ -562,7 +565,9 @@ namespace chaosaddon
             //Thread teleport = new Thread(new ParameterizedThreadStart(randomWarpEvent));
             //teleport.Start(); //starts a teleport (see randomWarpEvent)
             //debug
-           
+
+            
+
             
             
             
@@ -686,7 +691,7 @@ namespace chaosaddon
 
             CurseActive = true;
             CurCurse = new Random().Next(0, 6);
-            
+
             switch (CurCurse)
             {
                 case 0:
@@ -774,22 +779,7 @@ namespace chaosaddon
         /// CONSTANT CHANGES
         private void OnUpdateTicked(object? sender, UpdateTickedEventArgs e)
         {
-            /*
-            if (index != -1)
-            {
-
-                if (index < DCpairs.ToList().Count)
-                {
-
-                    DoTransfers(DCpairs.ToList()[index]);
-                    index++;
-                }
-                else
-                {
-                    index = 0;
-                }
-            }
-            */
+           
         }
 
         /// EXP
@@ -801,7 +791,7 @@ namespace chaosaddon
                     GainExpHoe = true;
                 else
                     GainExpHoe = false;
-
+            
         }
 
 
@@ -809,6 +799,7 @@ namespace chaosaddon
 
         private async void OnTimeChanged(object? sender, TimeChangedEventArgs e)
         {
+           
             /*
             if(!Game1.locations.Contains(Game1.currentLocation))
             {
@@ -1033,7 +1024,44 @@ namespace chaosaddon
         }
 
 
+        private void SecretNoteEvents(object obj)
+        {
+            LinkedList<String> LOCATIONS = new LinkedList<String>();
+            LinkedList<Vector2> TILES = new LinkedList<Vector2>();
+            LinkedList<String> MESSAGES = new LinkedList<String>();
+            
+            ///LOCATIONS.AddLast("your location name here");
+            ///...
+            //TILES.AddLast(new Vector2({ X val },{ y val});
+            //...
+            //MESSAGES.AddLast("your message here");
 
+            //EXAMPLE
+            
+            //LOCATIONS.AddLast("FarmHouse");
+            //TILES.AddLast(new Vector2(10, 10));
+            //MESSAGES.AddLast("hello");
+
+            while (CurseActive && Game1.player != null)
+            {
+               
+                if ( (Helper.Input.IsDown(SButton.MouseLeft) || Helper.Input.IsDown(SButton.MouseRight)) && !Game1.isTimePaused) // checks if the player clicks (its outside as a guard clause)
+                {
+                    
+                    for (int i = 0; i < LOCATIONS.Count; i++) //assumes that the arrays are all equal length. 
+                    {
+                        if (Game1.player.currentLocation.Name.Equals(LOCATIONS.ElementAt(i)) && (Game1.currentCursorTile.X == TILES.ElementAt(i).X) && (Game1.currentCursorTile.X == TILES.ElementAt(i).Y)) //is player in location and cursor at tile?
+                        {
+
+                            //show the letter
+                            Game1.drawLetterMessage(MESSAGES.ElementAt(i));
+                            break; //break because there cant be more than one letter at a tile.
+                        }
+                    }
+                    Thread.Sleep(1000); //sleep for no dupes
+                }
+            }
+        }
 
         // EVENTS
 
@@ -3237,7 +3265,7 @@ namespace chaosaddon
 
             public static bool GetplacementAction(GameLocation location, int x, int y, StardewValley.Object __instance, ref bool __result)
             {
-
+                
                 try
                 {
                     Microsoft.Xna.Framework.Vector2 vector = new Microsoft.Xna.Framework.Vector2(x / 64, y / 64);
