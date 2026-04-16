@@ -51,6 +51,8 @@ using System.Diagnostics.CodeAnalysis;
 using StardewValley.Extensions;
 using StardewValley.Buildings;
 using StardewModdingAPI.Integrations.GenericModConfigMenu;
+using Mono.Cecil;
+using System.Reflection.Metadata;
 
 
 // TO-ADD LIST
@@ -123,9 +125,15 @@ namespace chaosaddon
         BuffEffects buffEffectsMusic;
         Buff musicAttack;
 
+        //Secret notes
+        LinkedList<String> SN_LOCATIONS = new LinkedList<String>();
+        LinkedList<Vector2> SN_TILES = new LinkedList<Vector2>();
+        static LinkedList<StardewValley.Object> SN_NOTES = new LinkedList<StardewValley.Object>();
+        static LinkedList<int> SN_NUMBERS = new LinkedList<int>();
+        LinkedList<String> SN_MESSAGES = new LinkedList<string>();
 
         //OBJECTS
-
+        
         /// DirectionChest
 
         BigCraftableData dcup = new BigCraftableData();
@@ -221,7 +229,12 @@ namespace chaosaddon
             postfix: new HarmonyMethod(typeof(ModEntry), nameof(GetperformRemoveAction))
             );
 
+            harmony.Patch(
+            original: AccessTools.Method(typeof(StardewValley.Object), nameof(StardewValley.Object.performUseAction)),
+            prefix: new HarmonyMethod(typeof(ModEntry), nameof(GetperformUseAction))
+            );
 
+            
 
 
             /*harmony.Patch(
@@ -247,6 +260,30 @@ namespace chaosaddon
 
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/SecretNotes"))
+            {
+
+                e.Edit(asset =>
+                {
+
+                    var data = asset.AsDictionary<int, string>().Data;
+                    for (int i = 0; i < SN_NOTES.Count; i++)
+                    {
+                        data.Add(SN_NUMBERS.ElementAt(i), SN_MESSAGES.ElementAt(i));
+                    }
+
+
+                    //ex
+
+                    //data.Add(2000,"Y2K!^ this is the line beneath");
+
+                }
+                );
+
+
+
+
+            }
             if (e.NameWithoutLocale.IsEquivalentTo("Data/NPCDispositions") && Game1.player != null && canRomance != null)
             {
 
@@ -292,9 +329,9 @@ namespace chaosaddon
                     data["473"].Description = "Beans, the ultimate power source. Grows in 7, regrows in 2.";
                     /// cauli
                     data["474"].Price = 690;
-                    data["474"].Description = "Caule- Calli- Fuck my typing, just know that these are one hell of an investment. Grows in 12, regrows in 6.";
+                    data["474"].Description = "Caule- Calli- #### my typing, just know that these are one hell of an investment. Grows in 12, regrows in 6.";
                     ///Kale
-                    data["477"].Description += "  Who the fuck buys these?";
+                    data["477"].Description += "  Who the #### buys these?";
                     ///Melon
                     data["479"].Description = "heh. Grows in 12.";
                     ///Tomato
@@ -404,7 +441,7 @@ namespace chaosaddon
                     var Potato = data["475"];
                     Potato.DaysInPhase = new List<int> { 0, 0, 0, 2, 3 };
                     Potato.IsRaised = true;
-                    Potato.Seasons.Add(Season.Winter); ///russian potatoes. fuck it.
+                    Potato.Seasons.Add(Season.Winter); ///russian potatoes. #### it.
 
 
                     var Cauli = data["474"];
@@ -473,10 +510,10 @@ namespace chaosaddon
                     data.Add("WrongAddress1", "Hey. It's been a while, Yu. It's been a while since the incident way back in Inaba. ^I doubt I would ever get parole for what I did, but who cares about that yeah? ^^ Haha.. just kidding, I'm making plenty enough friends down where I am. Anyways, make sure you visit that old geezer sometime to make sure he's fine yeah? ^^ Just between me and you, I think he would want the company.");
                     data.Add("WrongAddress2", "HEY MAN! It's Joe. ^ I know I have a lot of work nowadays with all the gangs and shit but I was wonderin if you still want that old guitar that Neko stole.  ^ It's a bit too old for me nowadays, so I bought another, ...ya want it?^ ANYWAYS. Take care of ya self man!");
                     data.Add("WrongAddress3", "TO: MONOKUMA ^^ Looking at the remix you sent me, it's great! I wish there was a little more bass though, ynow? ^ Like, a really cool bass moment. ^^ Think of the craziest bass solo. Like, focus on that. ^ ^ ^ -Wright  ");
-                    data.Add("WrongAddress4", "TO: WRIGHT ^^ I know you have been working on those 'cool rips' for the KFAD tournament, but let me just plead for a second. ^^ You are working with a KNOWN serial killer here. She has killed hundreds of people. ^ ^ I dont care how 'cool' or 'sick' this music is, you have to have some idea of your morals here, Wright. ^^ And please, stop sending me cat memes from 2011 for fucks sake. ^ ^ -Edgeworth ");
+                    data.Add("WrongAddress4", "TO: WRIGHT ^^ I know you have been working on those 'cool rips' for the KFAD tournament, but let me just plead for a second. ^^ You are working with a KNOWN serial killer here. She has killed hundreds of people. ^ ^ I dont care how 'cool' or 'sick' this music is, you have to have some idea of your morals here, Wright. ^^ And please, stop sending me cat memes from 2011 for #### sake. ^ ^ -Edgeworth ");
                     data.Add("WrongAddress5", "Incident Report #####: Killer Tomatoes on Druid Class Spaceship ^^ Neotransen worker, Eveline Tokkori, was found making mass amounts of mutated, rabid tomatoes on a Druid class spaceship ^ in the Frontier area. ^^ It is probable that she had messed around with mutagen, but to this degree seems.. odd. ^^ She was found gibbed, and a clone has been made. ^ ^ Please inform her, once again, the dangers of mutagen. ");
                     data.Add("WrongAddress6", "Hey, you. You’re finally awake. You were trying to cross the border, right? Walked right into that Imperial ambush, same as us, and that thief over there. -Ralof");
-                    data.Add("WrongAddress7", "DON'T GO TO FUCKING SLEEP. I SWEAR TO GOD EVERY TIME I HAVE TO TELL YOU FUCKS THIS, BUT NOBODY ON THIS FUCKING ASTEROID IS GOING TO SLEEP. -CG");
+                    data.Add("WrongAddress7", "DON'T GO TO ######## SLEEP. I SWEAR TO GOD EVERY TIME I HAVE TO TELL YOU ##### THIS, BUT NOBODY ON THIS ####### ASTEROID IS GOING TO SLEEP. -CG");
                     data.Add("WrongAddress8", "Poyo! (The rest is gibbersh.)");
                     data.Add("uhwhat", "#########, Baltimore! ^^^ If you're dumb enough to buy a new car this weekend, you're a big enough schmuck to come to Big Bills Hell Cars!! ^^ Bad deals! Cars that break down! Thieves! ^^ If you think you're going to find a bargain at Big Bill's, you can ######! ^^ It's our belief that you're such a ########, you'll fall for this #########—guaranteed!^ If you find a better deal, ##########! ^^ You heard us right! #########! ^^ Bring your trade! Bring your title! Bring your ######## ^ That's right! ^ We'll ########## ^^ Because at Big Bill Hell, you're #######! ^^^ Take a hike to Big Bill Hell's, Home of Challenge Pissing! ^ That's right! Challenge Pissing! ^^ How does it work? ^ If you can #### six feet in the air straight up and not get wet, you get no down payment! ^ Don't wait! Don't delay! Don't ########! ^ Only at Big Bill Hell's, the only dealer that ########! ^ Hurry up ####! ^^ This event ends the minute after you write us a cheque ^ -and it better not bounce or you're ######! ^^ Go to hell—Big Bill Hell's Cars! Baltimore's filthiest, and exclusive home of ########## in the state of Maryland ^ -guaranteed! ^^ -Tenna");
 
@@ -714,6 +751,8 @@ namespace chaosaddon
                     break;
 
             }
+            secretLetterLoop = new Thread(SecretNoteEvents);
+            secretLetterLoop.Start();
 
         }
 
@@ -773,6 +812,10 @@ namespace chaosaddon
                     {
                         break;
                     }
+            }
+            while(secretLetterLoop.IsAlive)
+            {
+
             }
         }
 
@@ -939,7 +982,7 @@ namespace chaosaddon
                         {
                             Game1.player.health /= 2;
                         }
-                        Game1.hudMessages.Add(new HUDMessage("The fuck?"));
+                        Game1.hudMessages.Add(new HUDMessage("The ####?"));
                         Game1.showGlobalMessage(Game1.player.Name + " got their health snapped in half.");
                         break;
                     case 8:
@@ -1026,39 +1069,34 @@ namespace chaosaddon
 
         private void SecretNoteEvents(object obj)
         {
-            LinkedList<String> LOCATIONS = new LinkedList<String>();
-            LinkedList<Vector2> TILES = new LinkedList<Vector2>();
-            LinkedList<String> MESSAGES = new LinkedList<String>();
             
-            ///LOCATIONS.AddLast("your location name here");
-            ///...
-            //TILES.AddLast(new Vector2({ X val },{ y val});
-            //...
-            //MESSAGES.AddLast("your message here");
 
-            //EXAMPLE
+
             
-            //LOCATIONS.AddLast("FarmHouse");
-            //TILES.AddLast(new Vector2(10, 10));
-            //MESSAGES.AddLast("hello");
+
 
             while (CurseActive && Game1.player != null)
             {
-               
-                if ( (Helper.Input.IsDown(SButton.MouseLeft) || Helper.Input.IsDown(SButton.MouseRight)) && !Game1.isTimePaused) // checks if the player clicks (its outside as a guard clause)
+
+                if ((Helper.Input.IsDown(SButton.MouseLeft) || Helper.Input.IsDown(SButton.MouseRight)) && !Game1.isTimePaused) // checks if the player clicks (its outside as a guard clause)
                 {
-                    
-                    for (int i = 0; i < LOCATIONS.Count; i++) //assumes that the arrays are all equal length. 
+
+                    for (int i = 0; i < SN_LOCATIONS.Count; i++) //assumes that the arrays are all equal length.
                     {
-                        if (Game1.player.currentLocation.Name.Equals(LOCATIONS.ElementAt(i)) && (Game1.currentCursorTile.X == TILES.ElementAt(i).X) && (Game1.currentCursorTile.X == TILES.ElementAt(i).Y)) //is player in location and cursor at tile?
+                        if (Game1.player.currentLocation.Name.Equals(SN_LOCATIONS.ElementAt(i)) && (Game1.currentCursorTile.X == SN_TILES.ElementAt(i).X) && (Game1.currentCursorTile.Y == SN_TILES.ElementAt(i).Y)) //is player in location and cursor at tile?
                         {
 
-                            //show the letter
-                            Game1.drawLetterMessage(MESSAGES.ElementAt(i));
-                            break; //break because there cant be more than one letter at a tile.
+                            int notes = 1;
+                            Utility.GetUnseenSecretNotes(Game1.player, false, out notes); //check if any secret notes are left
+                            if (notes != 0 && !Game1.player.secretNotesSeen.Contains(SN_NUMBERS.ElementAt(i)) && Game1.player.getIndexOfInventoryItem(SN_NOTES.ElementAt(i)) == -1) //Has the player seen the note before?
+                            {
+                                Game1.player.addItemToInventory(SN_NOTES.ElementAt(i)); //Add the note if not!
+                                Thread.Sleep(1000);
+                                break; //break since we can only have 1 note at a time per tile.
+                            }
                         }
                     }
-                    Thread.Sleep(1000); //sleep for no dupes
+
                 }
             }
         }
@@ -1104,7 +1142,7 @@ namespace chaosaddon
                                 int r = new Random().Next(0, 64);
                                 if (r == 3)
                                 {
-                                    // I fucking hate using goto here as goto sucks but its better than trying to create a complex break system that works with vector2 buf, as buf cannot be null.
+                                    // I ####ing hate using goto here as goto sucks but its better than trying to create a complex break system that works with vector2 buf, as buf cannot be null.
                                     goto randomWarpEvent_outOfLoop;
                                 }
                                 times++;
@@ -1415,13 +1453,13 @@ namespace chaosaddon
                         }
                         if (Game1.getMusicTrackName() != null)
                         {
-                            Console.WriteLine("Chaosaddon: Ah fuck. Something in the method \"OSTBPM\" went wrong.");
+                            Console.WriteLine("Chaosaddon: Ah ####. Something in the method \"OSTBPM\" went wrong.");
 
                         }
                     }
                     catch
                     {
-                        Console.WriteLine("Chaosaddon: Ah fuck. Something else in the method \"OSTBPM\" went wrong.");
+                        Console.WriteLine("Chaosaddon: Ah ####. Something else in the method \"OSTBPM\" went wrong.");
                     }
                 }
 
@@ -2824,15 +2862,40 @@ namespace chaosaddon
             // NEW CHANGES
             private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
             {
+                /*DEBUG FIND IN ASSEMBLY
+                Mono.Cecil.AssemblyDefinition ad = Mono.Cecil.AssemblyDefinition.ReadAssembly("C:\\Program Files (x86)\\Steam\\steamapps\\common\\Stardew Valley\\Stardew Valley.dll");
+                foreach(var module in ad.Modules)
+                {
+                    foreach(var type in module.Types)
+                    {
+                        foreach(var Method in type.Methods)
+                        {
+                            if (Method.Body != null)
+                            {
+                                foreach (var ins in Method.Body.Instructions)
+                                {
+                                    if (ins.OpCode == Mono.Cecil.Cil.OpCodes.Ldstr && ins.Operand.ToString().Contains("79"))
+                                    {
+                                    Console.WriteLine(Method.Name + ":" + ins.Operand.ToString());
+                                    }
+                                }
+                        }
+                        }
+                    }
+                }
+                */
+                
+
+
                 //misc events
                 Misc = new Thread(new ParameterizedThreadStart(MiscEvents));
                 Misc.Start();
-                Music = new Thread(new ParameterizedThreadStart(OSTBPM));
-                Music.Start();
+                //Music = new Thread(new ParameterizedThreadStart(OSTBPM));
+                //Music.Start();
                 //data
 
-                BPMData.initalize();
-                BPM = BPMData.getData();
+                //BPMData.initalize();
+                //BPM = BPMData.getData();
 
 
 
@@ -2937,7 +3000,7 @@ namespace chaosaddon
                 /// BEERSEEDS. OBJ DATA
                 Beerseeds.Name = "Beer Seeds";
                 Beerseeds.DisplayName = "Beer Seeds";
-                Beerseeds.Description = "Fuck it; who needs hops to get drunk? Plant in Fall or Spring.";
+                Beerseeds.Description = "#### it; who needs hops to get drunk? Plant in Fall or Spring.";
                 Beerseeds.Type = "Seeds";
                 Beerseeds.Category = -74;
                 Beerseeds.Price = 20;
@@ -3182,21 +3245,85 @@ namespace chaosaddon
                 Bombshop.QualityModifierMode = StardewValley.GameData.QuantityModifier.QuantityModifierMode.Stack;
                 Bombshop.ModData = null;
                 Bombshop.PerItemCondition = null;
-                //*/
+            //*/
+
+            //Secret notes
+            ///LOCATIONS.AddLast("your location name here");
+            ///...
+            //TILES.AddLast(new Vector2({ X val },{ y val});
+            //...
+            //StardewValley.Object note{numberhere} = ItemRegistry.Create<StardewValley.Object>("(O)79");
+            //note{number}.name = note{number}.name + " #" + {numberhere};
+            //NOTES.AddLast(note{numberhere});
+            //...
+            //NUMBERS.AddLast({numberhere});
+            //..
+
+            //EXAMPLE
+            
+            SN_LOCATIONS.AddLast("Farm");
+            SN_TILES.AddLast(new Vector2(76, 10));
+            StardewValley.Object note2000 = ItemRegistry.Create<StardewValley.Object>("(O)79");
+            note2000.Name = note2000.Name + " #" + 2000;
+            SN_NOTES.AddLast(note2000);
+            SN_NUMBERS.AddLast(2000);
+            SN_MESSAGES.AddLast("J xako'n cupq oobn lv ei thde lofh.^A obx fvxbwyf ng np, hgdiyjl ui zpey, sue ynlssguf C khx mwlnyv sjew aiyq dbhlle gw kfuv.^P.. ubaul gwlucfn ubwt xuk aiy hhsn gm ns dpgy lobn uobhyle ynlsslojhy.");
+
+
+            SN_LOCATIONS.AddLast("Town");
+            SN_TILES.AddLast(new Vector2(26, 26));
+            StardewValley.Object note2001 = ItemRegistry.Create<StardewValley.Object>("(O)79");
+            note2001.Name = note2001.Name + " #" + 2001;
+            SN_NOTES.AddLast(note2001);
+            SN_NUMBERS.AddLast(2001);
+            SN_MESSAGES.AddLast("N tcatltl roxr bt ubr!^W nubns V'r tuzhua!^Vy kuf t hiei hczx gmgywht mhm ofbx vgtw gms zrltqifz, vhm I lvi wn!^### ngd ur ffy fnpme ugspael gt py cxrnbwacaz, sw..^ V oimg piau dco jxrm ujfy.");
+
+            SN_LOCATIONS.AddLast("Mountain");
+            SN_TILES.AddLast(new Vector2(82, 9));
+            StardewValley.Object note2002 = ItemRegistry.Create<StardewValley.Object>("(O)79");
+            note2002.Name = note2002.Name + " #" + 2002;
+            SN_NOTES.AddLast(note2002);
+            SN_NUMBERS.AddLast(2002);
+            SN_MESSAGES.AddLast("Tryel... B.. C usnw frbp qyet wj hb.^Lbv hihy, qbf. Myi jxnx thn ####### foiheuzh. V lun leu wsqr ucp- I gjr'g puex tr mizxgsir lo-^M uxuih tkvx ux qfylg ys ngskliqb xb dyvt hln wrtn lt tkzvr uok.. M dri'x hgxvvswvrq...");
+
+            SN_LOCATIONS.AddLast("Town");
+            SN_TILES.AddLast(new Vector2(63, 62));
+            StardewValley.Object note2003 = ItemRegistry.Create<StardewValley.Object>("(O)79");
+            note2003.Name = note2003.Name + " #" + 2003;
+            SN_NOTES.AddLast(note2003);
+            SN_NUMBERS.AddLast(2003);
+            SN_MESSAGES.AddLast("N aogbgpo yc uxu ofe tt haf oywd ror jn acngcg uhle N, vcifffwqm, kbml pgjf vtwe.^^### dlnr habt esj xiwhe nlrs ii uo str obw uowo mwa miae sj qcnmd^dld hvtu I oti wh tod esfh W ppuwo tbzr hee l iom.. tod tq sch af wzfqr atle dfws W zpt esj aoq bmzfsh.^Vx tato yvom uhp uzrux xad afwr.^Miae uzfm pbs alnr.^Habt ####### xlis gnse esng ktt aww tjsk uhp tshskoee.^^Xta.. W..");
+
+            SN_LOCATIONS.AddLast("Beach");
+            SN_TILES.AddLast(new Vector2(63, 62));
+            StardewValley.Object note2004 = ItemRegistry.Create<StardewValley.Object>("(O)79");
+            note2004.Name = note2004.Name + " #" + 2004;
+            SN_NOTES.AddLast(note2004);
+            SN_NUMBERS.AddLast(2004);
+            SN_MESSAGES.AddLast("J poua nc jqi usdcf.J laxl us rgsz sn ### pvx...^M hcaf xhkz. Xly vof lens emd jl ievg ap tier ni? Wjhu hif P es??^^Pgvqpe mlft hcyseskuh qe, ulohipn ni dghul tjyfetu, jbplkuh qe c mseuf, h nyrflsir....^K jbr dghm aivo b gowwmi a fhz fuv, tpq, iv'z ulowzbrdu-^P kysv jbr't fv jx. I ehox..");
+
+
+            SN_LOCATIONS.AddLast("Town");
+            SN_TILES.AddLast(new Vector2(112, 18));
+            StardewValley.Object note2005 = ItemRegistry.Create<StardewValley.Object>("(O)79");
+            note2005.Name = note2005.Name + " #" + 2005;
+            SN_NOTES.AddLast(note2005);
+            SN_NUMBERS.AddLast(2005);
+            SN_MESSAGES.AddLast("F pbv lftcgrjh fkrhi V nexx jtsyi owx N anpx ylvu xt fr jiwi vh escbpi mintw ri gjvtytj xmmf hsw eaassi gjey mf tifhvpk N hbp'x heeg mk cbw xmmam mr e zwviiegv gyg asz rrgh ys ykwyia vs ri gjiwi nti iizqrx ma vlnw jqvqh gjey ar nmai vp esh gjid eeg xwcvpk ys xkpq qr rpjefg myw ogis hnaw nr ugvj eaf");
+
+            SN_LOCATIONS.AddLast("Farm");
+            SN_TILES.AddLast(new Vector2(68, 16));
+            StardewValley.Object note2006 = ItemRegistry.Create<StardewValley.Object>("(O)79");
+            note2006.Name = note2006.Name + " #" + 2006;
+            SN_NOTES.AddLast(note2006);
+            SN_NUMBERS.AddLast(2006);
+            SN_MESSAGES.AddLast("Y'p ieunn. R uov'f wwwa nby C'h cwiew, jut B ui.^#### rfy ### sdxb gr vokfj ga dr. Rsdy hnsq xd qpu vfhg n vwd qyzr xgt P sqeqb lf emw ajyns. ^Vknrk ndl vbqn wmd nzadkca rusi gr gwt #### wgdmh ly nrtfw.. Mz atk szjfki wp rekeog dfsrzx.^### esgpgo ozb kclvh qq mcau mskhe foax lg lodygrp lrd thim zqgo sg xog qaat.^ Uv'k ansyzoeub qgmia cerkzitf ugi.. cyhg, ed ncp'v gvsu xjxfb ## cg gyfagi..");
 
 
 
+            
 
-
-
-
-
-
-
-
-
-
-            }
+        }
 
 
 
@@ -3244,7 +3371,7 @@ namespace chaosaddon
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Chaosaddon: Ah fuck. Something in the Harmony patch \"GetAmmoDamage_Prefix\" went wrong.");
+                    Console.WriteLine("Chaosaddon: Ah ####. Something in the Harmony patch \"GetAmmoDamage_Prefix\" went wrong.");
                     return true;
                 }
             }
@@ -3258,7 +3385,7 @@ namespace chaosaddon
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Chaosaddon: Ah fuck. Something in the Harmony patch \"GeteatObject\" went wrong.");
+                    Console.WriteLine("Chaosaddon: Ah ####. Something in the Harmony patch \"GeteatObject\" went wrong.");
 
                 }
             }
@@ -3359,7 +3486,7 @@ namespace chaosaddon
                 catch (Exception e)
                 {
 
-                    Console.WriteLine("Chaosaddon: Ah fuck. Something in the Harmony patch \"GetplacementAction\" went wrong.");
+                    Console.WriteLine("Chaosaddon: Ah ####. Something in the Harmony patch \"GetplacementAction\" went wrong.");
                     return true;
                 }
             }
@@ -3375,7 +3502,7 @@ namespace chaosaddon
                 catch (Exception e)
                 {
 
-                    Console.WriteLine("Chaosaddon: Ah fuck. Something in the Harmony patch \"GetplacementAction2\" went wrong.");
+                    Console.WriteLine("Chaosaddon: Ah ####. Something in the Harmony patch \"GetplacementAction2\" went wrong.");
 
                 }
             }
@@ -3391,9 +3518,55 @@ namespace chaosaddon
                 catch (Exception e)
                 {
 
-                    Console.WriteLine("Ah fuck. Something in the Harmony patch \"GetperformRemoveAction\" went wrong.");
+                    Console.WriteLine("Ah ####. Something in the Harmony patch \"GetperformRemoveAction\" went wrong.");
 
                 }
+            }
+
+            public static bool GetperformUseAction(GameLocation location, ref bool __result)
+            {
+                try
+                {
+               
+                    if (Game1.player.ActiveItem.ItemId == "79")
+                    {
+                        String name = Game1.player.ActiveItem.Name;
+                        int index = -1;
+                        for(int i = 0; i<SN_NUMBERS.Count; i++)
+                        {
+                            if(name.Contains("#"+SN_NUMBERS.ElementAt(i)))
+                            {
+                                index = i; break;
+                            }
+                        }
+                        if (index != -1)
+                        {
+                        
+                            int no = SN_NUMBERS.ElementAt(index);
+                            if (!Game1.player.secretNotesSeen.Add(no))
+                            {
+                                __result = true;
+                                return false;
+                            }
+
+                            Game1.activeClickableMenu = new LetterViewerMenu(no);
+                            __result = true;
+                            
+                            
+
+                        }
+                        
+                    }
+
+                    return false;
+            }
+                catch
+                {
+                   
+                Console.WriteLine("Ah ####. Something in the Harmony patch \"GetperformUseAction\" went wrong.");
+                return true;
+            }
+             
             }
 
             // REFRENCE
